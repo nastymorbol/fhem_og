@@ -4,3 +4,4 @@ OPENgate last changes:
  - NofitfyRegexChanged
  - MQTT Configuration added
  - Fixed Use of uninitialized value
+ - FVER Internal

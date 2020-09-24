@@ -18,7 +18,9 @@ BACnetDevice_Initialize($)
                        "disable disabledForIntervals " .
                        "notificationClasses notificationClassRegistrations covRegisterOnObjects " .
                        "registrationIntervall sendWhoIsIntervall useStaticBinding " .                       
-                       $readingFnAttributes;  
+                       $readingFnAttributes;
+
+  $hash->{FVER}     = "2020-09-24_15:48:15";  
 }
 
 ###################################

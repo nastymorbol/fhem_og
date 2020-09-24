@@ -18,7 +18,9 @@ BACnetDatapoint_Initialize($)
   $hash->{AttrList}  = "readingList " .
                        "disable disabledForIntervals " .
                        "pollIntervall " .
-                       $readingFnAttributes;  
+                       $readingFnAttributes;
+  
+  $hash->{FVER}     = "2020-08-06_09:08:47";
 }
 
 ###################################

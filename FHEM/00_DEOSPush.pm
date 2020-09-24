@@ -23,6 +23,8 @@ DEOSPush_Initialize($)
   $hash->{AttrList}  =  "disable disabledForIntervals " .
                         "reporterId token serverId serverName " .
                        $readingFnAttributes;
+
+  $hash->{FVER}     = "2020-06-11_19:26:51";
 }
 
 ###################################

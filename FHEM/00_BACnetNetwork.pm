@@ -18,6 +18,8 @@ BACnetNetwork_Initialize($)
                        "disable disabledForIntervals " .
                        "ip port deviceInstance autocreateDevices " .                       
                        $readingFnAttributes;
+
+  $hash->{FVER}     = "2020-08-05_12:00:35";
 }
 
 ###################################
