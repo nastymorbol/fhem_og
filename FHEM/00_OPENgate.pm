@@ -261,8 +261,8 @@ OPENgate_InitMqtt($)
     if($mqttCli)
     {
       # Fixed Use of uninitialized 2020-09-24
-      my $attrVal = AttrVal("MqttCli", "readingList", undef);      
-      if($attrVal and $attrVal ne "gateway/$gatewayId/command/req.* { mqttCliCommand(\$TOPIC, \$NAME, \$DEVICETOPIC, \$EVENT) }")
+      my $attrVal = AttrVal("MqttCli", "readingList", "0");      
+      if($attrVal ne "gateway/$gatewayId/command/req.* { mqttCliCommand(\$TOPIC, \$NAME, \$DEVICETOPIC, \$EVENT) }")
       {
   	    fhem("attr MqttCli readingList gateway/$gatewayId/command/req.* { mqttCliCommand(\$TOPIC, \$NAME, \$DEVICETOPIC, \$EVENT) }");
         fhem("save") if $init_done;
