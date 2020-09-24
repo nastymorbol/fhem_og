@@ -5,3 +5,4 @@ OPENgate last changes:
  - MQTT Configuration added
  - Fixed Use of uninitialized value
  - FVER Internal
+ - Attr MqttClient werden nur noch upgedatet

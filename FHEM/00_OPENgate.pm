@@ -231,15 +231,14 @@ OPENgate_InitMqtt($)
         my $clientId = ReadingsVal($mqttClient->{NAME}, "clientId", undef);
         if(not defined($clientId))
         {
-          #MQTT2_CLIENT_Disco($mqttClient);
-          #MQTT2_CLIENT_Set($mqttClient, "password", undef);
-
-          fhem("attr MqttClient subscriptions gateway/$gatewayId/command/req/#");
-          fhem("attr MqttClient lwt gateway/$gatewayId/metric OFFLINE");
-          fhem("attr MqttClient clientId $gatewayId");
-          fhem("attr MqttClient SSL 1");
+          fhem("attr MqttClient subscriptions gateway/$gatewayId/command/req/#") if AttrVal("MqttClient", "subscriptions", "0") ne "gateway/$gatewayId/command/req/#";
+          fhem("attr MqttClient lwt gateway/$gatewayId/metric OFFLINE") if AttrVal("MqttClient", "lwt", "0") ne "gateway/$gatewayId/metric OFFLINE";
+          fhem("attr MqttClient msgAfterConnect gateway/$gatewayId/metric ONLINE") if AttrVal("MqttClient", "msgAfterConnect", "0") ne "gateway/$gatewayId/metric ONLINE";
+          fhem("attr MqttClient msgBeforeDisconnect gateway/$gatewayId/metric GO OFFLINE") if AttrVal("MqttClient", "msgBeforeDisconnect", "0") ne "gateway/$gatewayId/metric GO OFFLINE";
+          fhem("attr MqttClient clientId $gatewayId") if AttrVal("MqttClient", "clientId", "0") ne "$gatewayId";
+          fhem("attr MqttClient SSL 1") if AttrVal("MqttClient", "SSL", "0") ne "1";
+          fhem("attr MqttClient username $username") if AttrVal("MqttClient", "username", "0") ne "$username";
           fhem("set MqttClient password $password");
-          fhem("attr MqttClient username $username");
 #          fhem("modify MqttClient rmt01.deos-ag.com:8883");
           fhem("save") if $init_done;
         }
