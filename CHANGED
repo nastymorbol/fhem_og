@@ -3,3 +3,4 @@ OPENgate last changes:
  - Changed Log function in OPENgate.pm
  - NofitfyRegexChanged
  - MQTT Configuration added
+ - Fixed Use of uninitialized value

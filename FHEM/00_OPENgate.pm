@@ -148,13 +148,17 @@ OPENgate_Notify(@) {
 	}
   else
   {
-    if($own_hash->{Logger} ne "Inactive")
-    {      
-      foreach my $event (@{$events}) {
-        next if(!defined($event));
-        my $time = unixTimeMs();
-        my $payload = "$time $devName $event";
-        postMqttPayload("/data/log", $payload);
+    # Fixed Use of uninitialized 2020-09-24
+    if($own_hash->{Logger})
+    {
+      if($own_hash->{Logger} ne "Inactive")
+      {      
+        foreach my $event (@{$events}) {
+          next if(!defined($event));
+          my $time = unixTimeMs();
+          my $payload = "$time $devName $event";
+          postMqttPayload("/data/log", $payload);
+        }
       }
     }
   }
@@ -255,8 +259,9 @@ OPENgate_InitMqtt($)
     $mqttCli = $defs{MqttCli};
     if($mqttCli)
     {
-      my $attrVal = AttrVal("MqttCli", "readingList", undef);
-      if($attrVal ne "gateway/$gatewayId/command/req.* { mqttCliCommand(\$TOPIC, \$NAME, \$DEVICETOPIC, \$EVENT) }")
+      # Fixed Use of uninitialized 2020-09-24
+      my $attrVal = AttrVal("MqttCli", "readingList", undef);      
+      if($attrVal and $attrVal ne "gateway/$gatewayId/command/req.* { mqttCliCommand(\$TOPIC, \$NAME, \$DEVICETOPIC, \$EVENT) }")
       {
   	    fhem("attr MqttCli readingList gateway/$gatewayId/command/req.* { mqttCliCommand(\$TOPIC, \$NAME, \$DEVICETOPIC, \$EVENT) }");
         fhem("save") if $init_done;

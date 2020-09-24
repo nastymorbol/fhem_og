@@ -34,6 +34,7 @@ foreach $filename (@filenames)
 
   my $filesize = $statOutput[7];
 
+  print "UPD ".$filetime." ".$filesize." ".$prefix."/".$filename."\n";
   print FH "UPD ".$filetime." ".$filesize." ".$prefix."/".$filename."\n";
 }
 
