@@ -59,12 +59,14 @@ OPENgate_Set($@)
     return undef;#$hash->{ShellCommandRes};
   }
 
+  # Execut Shell Command ....
   if($prop eq "sh")
   {
     my $payload = join(" ", @a);
     return OPENgate_SshCommand($hash, $payload, undef);
   }
 
+  # Execut Shell Command ....
   if($prop eq "sush")
   {
     my $payload = join(" ", @a);
