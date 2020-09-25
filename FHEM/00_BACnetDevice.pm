@@ -20,7 +20,7 @@ BACnetDevice_Initialize($)
                        "registrationIntervall sendWhoIsIntervall useStaticBinding " .                       
                        $readingFnAttributes;
 
-  $hash->{FVER}     = "2020-09-24_15:48:15";  
+  $hash->{VERSION}     = "2020-09-24_15:48:15";  
 }
 
 ###################################

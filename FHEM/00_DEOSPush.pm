@@ -24,7 +24,7 @@ DEOSPush_Initialize($)
                         "reporterId token serverId serverName " .
                        $readingFnAttributes;
 
-  $hash->{FVER}     = "2020-06-11_19:26:51";
+  $hash->{VERSION}     = "2020-06-11_19:26:51";
 }
 
 ###################################

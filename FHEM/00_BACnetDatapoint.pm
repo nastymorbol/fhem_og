@@ -20,7 +20,7 @@ BACnetDatapoint_Initialize($)
                        "pollIntervall " .
                        $readingFnAttributes;
   
-  $hash->{FVER}     = "2020-08-06_09:08:47";
+  $hash->{VERSION}     = "2020-08-06_09:08:47";
 }
 
 ###################################

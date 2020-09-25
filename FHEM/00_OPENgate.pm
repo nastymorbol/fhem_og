@@ -20,7 +20,7 @@ OPENgate_Initialize($)
   use warnings 'qw';
   $hash->{AttrList} = join(" ", @attrList)." $readingFnAttributes";
 
-  $hash->{FVER}     = "2020-08-05_12:00:35";
+  $hash->{VERSION}     = "2020-08-05_12:00:35";
 }
 
 ###################################

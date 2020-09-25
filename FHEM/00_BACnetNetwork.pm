@@ -19,7 +19,7 @@ BACnetNetwork_Initialize($)
                        "ip port deviceInstance autocreateDevices " .                       
                        $readingFnAttributes;
 
-  $hash->{FVER}     = "2020-08-05_12:00:35";
+  $hash->{VERSION}     = "2020-08-05_12:00:35";
 }
 
 ###################################
