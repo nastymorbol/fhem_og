@@ -1,4 +1,7 @@
 OPENgate last changes:
+ 2020-09-25
+ - Über ein BACnet Device können nun alle Objekte des Devices beschrieben werden
+ 
  2020-09-24
  - Changed Log function in OPENgate.pm
  - NofitfyRegexChanged

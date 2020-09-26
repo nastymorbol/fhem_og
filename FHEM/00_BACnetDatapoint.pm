@@ -58,8 +58,6 @@ BACnetDatapoint_Set($$)
     my $value = join ' ', @a;
     $hash->{DriverReq} = "Write Property $cmd -> $value";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    #readingsSingleUpdate($hash, "state", "Write Property $cmd -> $value", 1);
-    #readingsSingleUpdate($hash, "prop_" . $cmd, $value, 1);
     readingsSingleUpdate($hash, $cmd, $value, 1);
     return undef;
   }
@@ -68,8 +66,6 @@ BACnetDatapoint_Set($$)
     my $value = shift @a;
     $hash->{DriverReq} = "Write Property $cmd -> $value";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    #readingsSingleUpdate($hash, "state", "Write Property $cmd -> $value", 1);
-    #readingsSingleUpdate($hash, "prop_" . $cmd, $value, 1);
     readingsSingleUpdate($hash, $cmd, $value, 1);
     return undef;
   }  
@@ -78,7 +74,6 @@ BACnetDatapoint_Set($$)
     my $value = join ' ', @a;
     my $le = "";
 
-    #readingsSingleUpdate($hash, "state", "Write Property $cmd -> $value", 1);
     $hash->{DriverReq} = "Write Property $cmd -> $value";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
 
@@ -100,7 +95,6 @@ BACnetDatapoint_Set($$)
       $le .= "0";
     }
 
-    #readingsSingleUpdate($hash, "prop_" . $cmd, $le, 1);
     readingsSingleUpdate($hash, $cmd, $value, 1);
     return undef;
   }
@@ -116,15 +110,37 @@ BACnetDatapoint_Set($$)
   {
     my ($rcmd, $rprop, $rval, $rerr) = @a;
     #my $value = join ' ', @a;
-    $hash->{DriverReq} = "done";
     $hash->{DriverRes} = join ' ', @a;
     if($rcmd eq "Write" and $rerr eq "OK")
     {
       my $bacProp = "prop_" . $rprop;
       readingsSingleUpdate($hash, $bacProp, $rval, 1);
     }
+
+    # Der Treiber schickt nach efolgter Ausführung eines Befehls eine Respons welche mit 
+    # done endet
+    if($hash->{DriverRes} =~ /done/)
+    {
+      if($hash->{DriverReq} ne "done")
+      {
+        $hash->{DriverReq} = "done" ;
+        DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+      }
+    }
+
+    # Der Treiber schickt unmittelbar nach empfang eines Commandos auf dem DriverReq
+    # eine Empfangsbestätigung auf DriverRes mit dem Commando + exec
+    # In dem Fall muss der Request um exec erweitert werden, damit befehle nicht doppelt gestartet werden
+    if($hash->{DriverRes} =~ /exec/)
+    {
+      if($hash->{DriverReq} !~ "exec")
+      {
+        $hash->{DriverReq} .= " exec" ;
+      }
+      DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    }
+
     DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
-    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
   }
   elsif($cmd =~ /urn/)
   {

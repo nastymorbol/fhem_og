@@ -34,7 +34,6 @@ BACnetNetwork_Get($$$)
 	{    
     $hash->{DriverReq} = "CMD:Get $opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    #readingsSingleUpdate($hash,"state", "Scan Network ...",1);
     return undef;
   }
 
@@ -52,9 +51,14 @@ BACnetNetwork_Set($@)
   
   my $cmd = shift @a;
   my @setList = ();
-
-
   
+  if($cmd eq "ScanNetwork")
+	{    
+    $hash->{DriverReq} = "CMD:Get ScanNetwork";
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    return undef;
+  }
+
   if($cmd eq "ip") {
     my $ip = shift @a;
   
@@ -100,13 +104,27 @@ BACnetNetwork_Set($@)
     my ($rcmd, $rprop, $rval, $rerr) = @a;
     #my $value = join ' ', @a;
     $hash->{DriverRes} = join ' ', @a;
+    
+    # Der Treiber schickt nach efolgter Ausführung eines Befehls eine Respons welche mit 
+    # done endet
     if($hash->{DriverRes} =~ /done/)
     {
       if($hash->{DriverReq} ne "done")
       {
         $hash->{DriverReq} = "done" ;
       }
-      DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    }
+
+    # Der Treiber schickt unmittelbar nach empfang eines Commandos auf dem DriverReq
+    # eine Empfangsbestätigung auf DriverRes mit dem Commando + exec
+    # In dem Fall muss der Request um exec erweitert werden, damit befehle nicht doppelt gestartet werden
+    if($hash->{DriverRes} =~ /exec/)
+    {
+      if($hash->{DriverReq} !~ /exec/)
+      {
+        $hash->{DriverReq} = $hash->{DriverReq} =~ s/CMD://r;
+        $hash->{DriverReq} .= " > exec" ;
+      }
     }
 
     if($rcmd eq "Write" and $rerr eq "OK")
@@ -114,6 +132,8 @@ BACnetNetwork_Set($@)
       my $bacProp = "prop_" . $rprop;
       readingsSingleUpdate($hash, $bacProp, $rval, 1);
     }
+
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
   
     return undef;
@@ -123,6 +143,7 @@ BACnetNetwork_Set($@)
     push @setList, "autocreateDevices";
   }
     
+  push @setList, "ScanNetwork:noArg";
   return join ' ', @setList;
 
   #readingsSingleUpdate($hash,"state",$v,1);

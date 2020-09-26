@@ -149,13 +149,12 @@ BACnetDevice_Set($$)
     if($value)
     {
       $hash->{DriverReq} = "CMD:Create Datapoints FILTER=$value";
-      DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     }
     else
     {
       $hash->{DriverReq} = "CMD:Create Datapoints";
-      DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     }
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return undef;
   }
 
@@ -178,15 +177,28 @@ BACnetDevice_Set($$)
   if($cmd =~ /DriverRes/)
   {
     my ($rcmd, $rprop, $rval, $rerr) = @a;
-    #my $value = join ' ', @a;
     $hash->{DriverRes} = join ' ', @a;
+
+    # Der Treiber schickt nach efolgter Ausführung eines Befehls eine Respons welche mit 
+    # done endet
     if($hash->{DriverRes} =~ /done/)
     {
       if($hash->{DriverReq} ne "done")
       {
         $hash->{DriverReq} = "done" ;
       }
-      DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    }
+
+    # Der Treiber schickt unmittelbar nach empfang eines Commandos auf dem DriverReq
+    # eine Empfangsbestätigung auf DriverRes mit dem Commando + exec
+    # In dem Fall muss der Request um exec erweitert werden, damit befehle nicht doppelt gestartet werden
+    if($hash->{DriverRes} =~ /exec/)
+    {
+      if($hash->{DriverReq} !~ /exec/)
+      {
+        $hash->{DriverReq} = $hash->{DriverReq} =~ s/CMD://r;
+        $hash->{DriverReq} .= " > exec" ;
+      }
     }
 
     if($rcmd eq "Write" and $rerr eq "OK")
@@ -195,6 +207,7 @@ BACnetDevice_Set($$)
       readingsSingleUpdate($hash, $bacProp, $rval, 1);
     }
     DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
   
     return undef;
   }
@@ -351,9 +364,9 @@ BACnetDevice_Define($$)
           set &lt;NAME%gt; createDatapoints .*VL-Fühler.*
       </p>
     </li>
-    <li><a name="SetBacnetProperty">createDatapoints</a><br>
+    <li><a name="BacnetProperty">createDatapoints</a><br>
       <p>
-        <code>set &lt;BACnetDevice&gt; &lt;SetBacnetProperty&gt; &lt;ObjectId&gt &lt;PropertyId&gt &lt;Value&gt</code>
+        <code>set &lt;BACnetDevice&gt; &lt;BacnetProperty&gt; &lt;ObjectId&gt; &lt;PropertyId|PropertyName&gt; &lt;Value&gt;</code>
         <br/><br/>
         Über diesen Befehl wird eine Property eines Objektes durch den Stack beschrieben.
         Die ObjectId wird dabei als ShortVariante und die PropertyId als uint Value übergeben.
@@ -361,7 +374,10 @@ BACnetDevice_Define($$)
         Das Ergebniss des Schreibbefehls wird async in DriverRes übermittelt.
         <br/>
         Beispiel:
-          <code>set &lt;BACnetDevice&gt; &lt;SetBacnetProperty&gt; &lt;AI:0&gt &lt;28&gt &lt;Eine neue Description&gt</code>
+        <br/>
+          <code>set bn_Device_47163 BacnetProperty AI:0 28 Eine neue Description</code>
+        <br/>
+          <code>set bn_Device_47163 BacnetProperty AI:0 presentValue 44.5</code>
       </p>
     </li>
 
