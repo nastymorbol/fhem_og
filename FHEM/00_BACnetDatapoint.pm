@@ -163,7 +163,7 @@ BACnetDatapoint_Set($$)
 
   my @setList = ();
 
-  push @setList, "prop_outOfService:uzsuToggle,True,False";
+  push @setList, "prop_outOfService:uzsuToggle,true,talse";
   push @setList, "prop_notificationClass";
   push @setList, "pollIntervall";
 
@@ -177,8 +177,8 @@ BACnetDatapoint_Set($$)
   }
   elsif($hash->{ObjectType} =~ /binary-.*/) 
   {      
-    push @setList, "prop_presentValue:uzsuToggle,True,False";
-    push @setList, "prop_alarmValue:uzsuToggle,True,False";
+    push @setList, "prop_presentValue:uzsuToggle,true,talse";
+    push @setList, "prop_alarmValue:uzsuToggle,true,talse";
   }
 
   return join ' ', @setList;
