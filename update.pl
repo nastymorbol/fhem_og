@@ -1,41 +1,70 @@
 #!/usr/bin/perl
 
 use File::Basename;
+use FileHandle;
 use POSIX qw(strftime);
 use strict;
 
 
-opendir my $dir, "FHEM" or die "Cannot open directory: $!";
-my @filenames = readdir $dir;
-closedir $dir;
+my @filenames = getFiles("FHEM");
 
 my $prefix = "FHEM";
-my $filename = "";
 
-open(FH, '>', "update_mods.txt") or die $!;
+my $filehandle;
+open($filehandle, '>', "update_mods.txt") or die $!;
 
-foreach $filename (@filenames)
-{
-  my @statOutput = stat($prefix."/".$filename);
-  
-  next if $filename eq ".";
-  next if $filename eq "..";
+writeUpdateFile($filehandle, "FHEM/", @filenames);
+@filenames = getFiles("base");
+writeUpdateFile($filehandle, "/", @filenames);
 
-  if (scalar @statOutput != 13)
-  {
-    printf("error: stat has unexpected return value for ".$prefix."/".$filename."\n");
-    next;
+
+close($filehandle);
+
+sub 
+getFiles($) {
+  my $folder = shift;
+
+  opendir my $dir, $folder or die "Cannot open directory: $!";
+  my @filenames = readdir $dir;
+  closedir $dir;
+
+  my @results = ();
+  for my $filename (@filenames) {
+    next if $filename eq ".";
+    next if $filename eq "..";
+
+    push @results, $folder."/".$filename;
   }
 
-  my $mtime = $statOutput[9];
-  my $date = POSIX::strftime("%Y-%m-%d", localtime($mtime));
-  my $time = POSIX::strftime("%H:%M:%S", localtime($mtime));
-  my $filetime = $date."_".$time;
-
-  my $filesize = $statOutput[7];
-
-  print "UPD ".$filetime." ".$filesize." ".$prefix."/".$filename."\n";
-  print FH "UPD ".$filetime." ".$filesize." ".$prefix."/".$filename."\n";
+  return @results;
 }
 
-close(FH);
+sub 
+writeUpdateFile(@) {
+  my ($fh, $destination, @filenames) = @_;
+
+  foreach my $filename (@filenames)
+  {
+    my @statOutput = stat($filename);
+    
+    next if $filename eq ".";
+    next if $filename eq "..";
+
+    if (scalar @statOutput != 13)
+    {
+      printf("error: stat has unexpected return value for ".$destination."/".$filename."\n");
+      next;
+    }
+
+    my $mtime = $statOutput[9];
+    my $date = POSIX::strftime("%Y-%m-%d", localtime($mtime));
+    my $time = POSIX::strftime("%H:%M:%S", localtime($mtime));
+    my $filetime = $date."_".$time;
+
+    my $filesize = $statOutput[7];
+
+    print "UPD ".$filetime." ".$filesize." ".$destination.basename($filename)."\n";
+    print $fh "UPD ".$filetime." ".$filesize." ".$destination.basename($filename)."\n";
+  }
+}
+
