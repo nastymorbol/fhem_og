@@ -14,8 +14,8 @@ my $filehandle;
 open($filehandle, '>', "update_mods.txt") or die $!;
 
 writeUpdateFile($filehandle, "FHEM/", @filenames);
-@filenames = getFiles(".", "entry.sh");
-writeUpdateFile($filehandle, "/", @filenames);
+@filenames = getFiles("www/pgm2",);
+writeUpdateFile($filehandle, "www/pgm2/", @filenames);
 
 
 close($filehandle);
