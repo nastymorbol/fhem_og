@@ -32,7 +32,7 @@ BACnetNetwork_Get($$$)
 
   if($opt eq "ScanNetwork")
 	{    
-    $hash->{DriverReq} = "CMD:Get $opt";
+    $hash->{DriverReq} = "CMD:Get$opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return undef;
   }
@@ -54,7 +54,7 @@ BACnetNetwork_Set($@)
   
   if($cmd eq "ScanNetwork")
 	{    
-    $hash->{DriverReq} = "CMD:Get ScanNetwork";
+    $hash->{DriverReq} = "CMD:GetScanNetwork";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return undef;
   }

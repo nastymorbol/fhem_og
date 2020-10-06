@@ -34,7 +34,7 @@ BACnetDatapoint_Get($$$)
   # CMD: Get Notification Classes
   if($opt eq "AllProperties")
   {    
-    $hash->{DriverReq} = "CMD:Get $opt";
+    $hash->{DriverReq} = "CMD:Get$opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return undef;
   }

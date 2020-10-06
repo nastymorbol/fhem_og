@@ -34,7 +34,7 @@ BACnetDevice_Get($$$)
   # CMD: Get Notification Classes
   if($opt eq "NotificationClasses")
   {    
-    $hash->{DriverReq} = "CMD:Get $opt";
+    $hash->{DriverReq} = "CMD:Get$opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     #readingsSingleUpdate($hash,"state", "CMD:Get Notification Classes",1);
     return undef;
@@ -43,7 +43,7 @@ BACnetDevice_Get($$$)
   # CMD: Get Alarm Summary (Request)
   elsif($opt eq "AlarmSummary")
   {    
-    $hash->{DriverReq} = "CMD:Get $opt";
+    $hash->{DriverReq} = "CMD:Get$opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     #readingsSingleUpdate($hash,"state", "CMD:Get Alarm Summary",1);
     return undef;
@@ -52,7 +52,7 @@ BACnetDevice_Get($$$)
   # CMD: Get Object List (Request)
   elsif($opt eq "ObjectList")
   {
-    $hash->{DriverReq} = "CMD:Get $opt";
+    $hash->{DriverReq} = "CMD:Get$opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     #readingsSingleUpdate($hash,"state", "CMD:Get Object List",1);
     return undef;
@@ -148,11 +148,11 @@ BACnetDevice_Set($$)
     my $value = join ' ', @a;
     if($value)
     {
-      $hash->{DriverReq} = "CMD:Create Datapoints FILTER=$value";
+      $hash->{DriverReq} = "CMD:CreateDatapoints FILTER=$value";
     }
     else
     {
-      $hash->{DriverReq} = "CMD:Create Datapoints";
+      $hash->{DriverReq} = "CMD:CreateDatapoints";
     }
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return undef;
@@ -166,7 +166,7 @@ BACnetDevice_Set($$)
     {
       if ($proprtyId) {
         my $value = join ' ', @a;
-        $hash->{DriverReq} = "CMD:Set BacnetProperty|$objectId $proprtyId $value";
+        $hash->{DriverReq} = "CMD:SetBacnetProperty|$objectId $proprtyId $value";
         DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
       }
     }
