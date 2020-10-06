@@ -14,15 +14,18 @@ my $filehandle;
 open($filehandle, '>', "update_mods.txt") or die $!;
 
 writeUpdateFile($filehandle, "FHEM/", @filenames);
-@filenames = getFiles("base");
+@filenames = getFiles(".", "entry.sh");
 writeUpdateFile($filehandle, "/", @filenames);
 
 
 close($filehandle);
 
 sub 
-getFiles($) {
+getFiles($$) {
   my $folder = shift;
+  my $regex = shift;
+
+  $regex = ".*" if not defined $regex;
 
   opendir my $dir, $folder or die "Cannot open directory: $!";
   my @filenames = readdir $dir;
@@ -32,6 +35,8 @@ getFiles($) {
   for my $filename (@filenames) {
     next if $filename eq ".";
     next if $filename eq "..";
+
+    next if $filename !~ $regex;
 
     push @results, $folder."/".$filename;
   }
