@@ -334,6 +334,8 @@ OPENgate_InitMqtt($)
   return undef;
 }
 
+# ------------ SHELL COMMANDS -------------
+
 sub
 OPENgate_SshCommand(@)
 {
@@ -341,16 +343,46 @@ OPENgate_SshCommand(@)
   if(defined($sudo))
   {
     my $qxcmd = "ssh -i /opt/fhem/.ssh/id_ed25519 deos\@host.docker.internal \"sudo bash -c \'$command\'\"";
-    $hash->{ShellCommand} = $command;    
-    $hash->{ShellCommandRes} = qx($qxcmd);
+    $hash->{ShellCommand} = $command;
+    my @result = exec_safe($qxcmd, 5, 3);
+    my $ret = pop(@result);
+    $hash->{ShellCommandRes} = join("\n", @result); #qx($qxcmd);
+    $hash->{ShellCommandRetCode} = $ret;
   }
   else
   {
     my $qxcmd = "ssh -i /opt/fhem/.ssh/id_ed25519 deos\@host.docker.internal \"bash -c \'$command\'\"";
     $hash->{ShellCommand} = $command;    
-    $hash->{ShellCommandRes} = qx($qxcmd);
+    my @result = exec_safe($qxcmd, 5, 3);
+    my $ret = pop(@result);
+    $hash->{ShellCommandRes} = join("\n", @result); #qx($qxcmd);
+    $hash->{ShellCommandRetCode} = $ret;
   }
   return $hash->{ShellCommandRes};
+}
+
+sub exec_safe {
+	my ($command, $timeout, $nice_val) = @_;
+	my @return_val;
+	eval {
+		local $SIG{ALRM} = sub { die "Timeout\n" };
+		alarm $timeout;
+		@return_val= `nice -n $nice_val $command 2>&1`;
+		alarm 0;
+	};
+	if($@) { # If command fails, return non-zero and msg
+		die unless $@ eq "Timeout\n";   # propagate unexpected errors
+		return ("Command timeout", 1);
+	} else {
+    my $ret = $?;
+    if($ret == -1) {
+  		chomp @return_val; push(@return_val, 0);
+    }
+    else {
+  		chomp @return_val; push(@return_val, $? >> 8);
+    }
+		return @return_val;
+	}
 }
 
 # ------------ START COMMAND CLI -------------

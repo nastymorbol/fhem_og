@@ -1,6 +1,6 @@
 #!/bin/bash
 
-array=( "00_BACnetDatapoint.pm" "00_BACnetDevice.pm" "00_BACnetNetwork.pm" "00_OPENgate.pm" "deos_00_mqtt.cfg")
+array=( "00_BACnetDatapoint.pm" "00_BACnetDevice.pm" "00_BACnetNetwork.pm" "00_OPENgate.pm")
 
 user=deos
 ip=192.168.123.59
