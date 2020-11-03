@@ -71,9 +71,4 @@ mqttCommand($$$$)
 	return { sessionId=>$session_id, command=>$command, state=>FmtDateTime(time()) };
 }
 
-
-
-
-
-
 1;
