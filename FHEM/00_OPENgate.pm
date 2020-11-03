@@ -19,8 +19,6 @@ OPENgate_Initialize($)
   );
   use warnings 'qw';
   $hash->{AttrList} = join(" ", @attrList)." $readingFnAttributes";
-
-  $hash->{VERSION}     = "2020-08-05_12:00:35";
 }
 
 ###################################
@@ -125,6 +123,8 @@ OPENgate_Define($$)
   return "Wrong syntax: use define <name> OPENgate" if(int(@a) != 2);
 
   $hash->{NOTIFYDEV} = "global";
+
+  $hash->{VERSION}   = "2020-11-03_13:28:19";
 
   return undef;
 }
