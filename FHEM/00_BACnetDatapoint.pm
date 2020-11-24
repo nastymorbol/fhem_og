@@ -19,8 +19,6 @@ BACnetDatapoint_Initialize($)
                        "disable disabledForIntervals " .
                        "pollIntervall " .
                        $readingFnAttributes;
-  
-  $hash->{VERSION}     = "2020-08-06_09:08:47";
 }
 
 ###################################
@@ -195,6 +193,9 @@ BACnetDatapoint_Define($$)
 
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
+
+
+  $hash->{VERSION}     = "2020-11-24_04:26:47";
 
   my $name = shift @a;
   my $type = shift @a;

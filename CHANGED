@@ -2,7 +2,8 @@ OPENgate last changes:
 2020-11-03
  - Shell Befehle werden nun mit timeout von 5s gestartet
  - Shell Befehle return code im ShellCommandRetCode Internal
-
+ - AutoUpdater aus config entfernt
+ 
 2020-10-05
  - Alle DriverReq wird nun zusammen geschrieben
 

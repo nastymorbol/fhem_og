@@ -23,8 +23,6 @@ DEOSPush_Initialize($)
   $hash->{AttrList}  =  "disable disabledForIntervals " .
                         "reporterId token serverId serverName " .
                        $readingFnAttributes;
-
-  $hash->{VERSION}     = "2020-06-11_19:26:51";
 }
 
 ###################################
@@ -264,6 +262,8 @@ DEOSPush_Define($$)
 	my @a = split( "[ \t][ \t]*", $def );
 
   return "Wrong syntax: use define <name> DEOSPush" if(int(@a) != 2);
+
+  $hash->{VERSION}     = "2020-11-24_04:26:47";
 
   my $name = $hash->{NAME};
 

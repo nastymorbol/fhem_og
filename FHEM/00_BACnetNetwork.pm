@@ -18,8 +18,6 @@ BACnetNetwork_Initialize($)
                        "disable disabledForIntervals " .
                        "ip port deviceInstance autocreateDevices " .                       
                        $readingFnAttributes;
-
-  $hash->{VERSION}     = "2020-08-05_12:00:35";
 }
 
 ###################################
@@ -160,6 +158,7 @@ BACnetNetwork_Define($$)
 
   return "Wrong syntax: use define <name> BACnetNetwork DeviceInstance IP[:Port]" if(int(@a) != 3);
 
+  $hash->{VERSION}     = "2020-11-24_04:26:47";
 
   if(AttrVal($name,"room",undef)) {
     

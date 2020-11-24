@@ -20,7 +20,6 @@ BACnetDevice_Initialize($)
                        "registrationIntervall sendWhoIsIntervall useStaticBinding " .                       
                        $readingFnAttributes;
 
-  $hash->{VERSION}     = "2020-09-24_15:48:15";  
 }
 
 ###################################
@@ -266,6 +265,8 @@ BACnetDevice_Define($$)
 
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
+
+  $hash->{VERSION}     = "2020-11-24_04:26:47";
 
   my $name = shift @a;
   my $type = shift @a;

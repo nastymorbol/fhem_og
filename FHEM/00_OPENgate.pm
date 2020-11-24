@@ -124,7 +124,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION}   = "2020-11-03_13:28:19";
+  $hash->{VERSION}     = "2020-11-24_04:26:47";
 
   return undef;
 }
