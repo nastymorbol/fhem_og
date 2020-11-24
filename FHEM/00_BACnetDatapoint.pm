@@ -168,10 +168,10 @@ BACnetDatapoint_Set($$)
   if($hash->{ObjectType} =~ /analog-.*/) 
   {      
     push @setList, "prop_limitEnable:multiple-strict,low-limit,high-limit";
-    push @setList, "prop_covIncrement:slider,0,0.1,20,1";
-    push @setList, "prop_lowLimit:slider,-100,1,100,1";
-    push @setList, "prop_highLimit:slider,-100,1,100,1";
-    push @setList, "prop_presentValue:slider,-100,1,100,1";
+    push @setList, "prop_covIncrement";
+    push @setList, "prop_lowLimit";
+    push @setList, "prop_highLimit";
+    push @setList, "prop_presentValue";
   }
   elsif($hash->{ObjectType} =~ /binary-.*/) 
   {      
@@ -195,7 +195,7 @@ BACnetDatapoint_Define($$)
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
 
-  $hash->{VERSION}     = "2020-11-24_04:26:47";
+  $hash->{VERSION}     = "2020-11-24_04:52:47";
 
   my $name = shift @a;
   my $type = shift @a;
