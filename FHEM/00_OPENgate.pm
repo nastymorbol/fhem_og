@@ -62,15 +62,34 @@ OPENgate_Set($@)
   # Execut Shell Command ....
   if($prop eq "sh")
   {
+    my $timeout = shift @a;
+    if($timeout eq 'timeout') {
+      $timeout = shift @a;
+    }
+    else{
+      unshift @a, $timeout;
+      $timeout = 10;
+    }
+
     my $payload = join(" ", @a);
-    return OPENgate_SshCommand($hash, $payload, undef);
+    return OPENgate_SshCommand($hash, $payload, $timeout, undef);
   }
 
   # Execut Shell Command ....
   if($prop eq "sush")
   {
+    my $timeout = shift @a;
+    if($timeout eq 'timeout') {
+      $timeout = shift @a;
+    }
+    else{
+      unshift @a, $timeout;
+      $timeout = 10;
+    }
+
+
     my $payload = join(" ", @a);
-    return OPENgate_SshCommand($hash, $payload, "1");
+    return OPENgate_SshCommand($hash, $payload, $timeout, "1");
   }
 
   my $value = join(" ", @a);  
@@ -339,12 +358,12 @@ OPENgate_InitMqtt($)
 sub
 OPENgate_SshCommand(@)
 {
-  my ($hash, $command, $sudo) = @_;  
+  my ($hash, $command, $timeout, $sudo) = @_;  
   if(defined($sudo))
   {
     my $qxcmd = "ssh -i /opt/fhem/.ssh/id_ed25519 deos\@host.docker.internal \"sudo bash -c \'$command\'\"";
     $hash->{ShellCommand} = $command;
-    my @result = exec_safe($qxcmd, 5, 3);
+    my @result = exec_safe($qxcmd, $timeout, 3);
     my $ret = pop(@result);
     $hash->{ShellCommandRes} = join("\n", @result); #qx($qxcmd);
     $hash->{ShellCommandRetCode} = $ret;
@@ -353,7 +372,7 @@ OPENgate_SshCommand(@)
   {
     my $qxcmd = "ssh -i /opt/fhem/.ssh/id_ed25519 deos\@host.docker.internal \"bash -c \'$command\'\"";
     $hash->{ShellCommand} = $command;    
-    my @result = exec_safe($qxcmd, 5, 3);
+    my @result = exec_safe($qxcmd, $timeout, 3);
     my $ret = pop(@result);
     $hash->{ShellCommandRes} = join("\n", @result); #qx($qxcmd);
     $hash->{ShellCommandRetCode} = $ret;
