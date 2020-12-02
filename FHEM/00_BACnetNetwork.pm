@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_BACnetNetwork.pm 7675 2020-12-02 03:44:40 sschulze $
+# $Id: 00_BACnetNetwork.pm 7676 2020-12-02 04:01:40 sschulze $
 package main;
 
 use strict;
@@ -158,7 +158,7 @@ BACnetNetwork_Define($$)
 
   return "Wrong syntax: use define <name> BACnetNetwork DeviceInstance IP[:Port]" if(int(@a) != 3);
 
-  $hash->{VERSION} = "2020-12-02_03:44:40"
+  $hash->{VERSION} = "2020-12-02_04:01:40";
 
   if(AttrVal($name,"room",undef)) {
     

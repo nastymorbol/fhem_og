@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 99_myUtils.pm 1617 2020-12-02 03:43:36 sschulze $
+# $Id: 99_myUtils.pm 1617 2020-12-02 03:44:40 sschulze $
 #
 # Save this file as 99_myUtils.pm, and create your own functions in the new
 # file. They are then available in every Perl expression.

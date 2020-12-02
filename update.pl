@@ -82,7 +82,7 @@ getFiles($$) {
         #   $hash->{VERSION}     = "2020-11-24_04:52:47";
         if($_ =~ /\$hash->{VERSION}/)
         {
-          my $fmttime = '"' . $date."_".$time .'"';
+          my $fmttime = '"' . $date."_".$time .'";';
           my $newversion = s/(.*)(\$hash->{VERSION})(.*)/$1$2 = $fmttime/r;
           @lines[$index] = $newversion;
           print "$_ --> $newversion\n"; # Print each entry in our array to the file
