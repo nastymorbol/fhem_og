@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 99_DockerImageInfo.pm 20666 2020-12-02 02:59:02 sschulze $
+# $Id: 99_DockerImageInfo.pm 8643 2020-12-02 03:41:09 sschulze $
 package main;
 
 use strict;

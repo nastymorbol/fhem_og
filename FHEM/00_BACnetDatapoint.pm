@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 98_dummy.pm 16965 2018-07-09 07:59:58Z rudolfkoenig $
+# $Id: 00_BACnetDatapoint.pm 10364 2020-12-02 03:43:38 sschulze $
 package main;
 
 use strict;
@@ -195,7 +195,7 @@ BACnetDatapoint_Define($$)
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
 
-  $hash->{VERSION}     = "2020-11-24_04:52:47";
+  $hash->{VERSION} = "2020-12-02_03:43:38"
 
   my $name = shift @a;
   my $type = shift @a;

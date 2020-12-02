@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 98_dummy.pm 16965 2018-07-09 07:59:58Z rudolfkoenig $
+# $Id: 00_DEOSPush.pm 11825 2020-12-02 03:43:36 sschulze $
 package main;
 
 use HttpUtils;
@@ -263,7 +263,7 @@ DEOSPush_Define($$)
 
   return "Wrong syntax: use define <name> DEOSPush" if(int(@a) != 2);
 
-  $hash->{VERSION}     = "2020-11-24_04:26:47";
+  $hash->{VERSION} = "2020-12-02_03:43:36"
 
   my $name = $hash->{NAME};
 
