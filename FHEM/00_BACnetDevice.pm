@@ -17,7 +17,7 @@ BACnetDevice_Initialize($)
   $hash->{AttrList}  = "readingList " .
                        "disable disabledForIntervals " .
                        "notificationClasses notificationClassRegistrations covRegisterOnObjects " .
-                       "registrationIntervall sendWhoIsIntervall useStaticBinding " .                       
+                       "registrationIntervall sendWhoIsIntervall useStaticBinding encoding " .                       
                        $readingFnAttributes;
 
 }
@@ -437,6 +437,14 @@ BACnetDevice_Define($$)
     <li><a href="#disable">disable</a></li>
     <li><a href="#disabledForIntervals">disabledForIntervals</a></li>
 
+    <li><a name="encoding">encoding</a><br>
+      Wenn angegeben so wird für die BACnet Kommunikation das angebene Encoding verwendet. Dies kann bei BACnet Devices erforderlich sein, welche
+      ein nicht BACnet Konformes Encoding verwenden.
+      <br>
+      Es kann sowohl die Encoding Id als auch der Encoding Name angeben werden.
+      <br>
+      Wird das Encoding erforderlich erkannt, so wird das Reading encodingOverride mit dem Namen des Encodings gesetzt.
+    </li>
 
     <li><a name="setList">setList</a><br>
       Liste mit Werten durch Leerzeichen getrennt. Diese Liste wird mit "set
