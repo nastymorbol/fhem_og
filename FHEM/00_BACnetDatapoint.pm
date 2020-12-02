@@ -1,5 +1,7 @@
 ##############################################
-# $Id: 00_BACnetDatapoint.pm 10366 2020-12-02 03:44:40 sschulze $
+# $Id: 00_BACnetDatapoint.pm 10428 2020-12-02 03:48:30 sschulze $
+# History
+# 2020-12-02 CLI Commandos Encoding Problem behoben
 package main;
 
 use strict;
@@ -195,7 +197,7 @@ BACnetDatapoint_Define($$)
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
 
-  $hash->{VERSION} = "2020-12-02_03:44:40"
+  $hash->{VERSION} = "2020-12-02_03:48:30"
 
   my $name = shift @a;
   my $type = shift @a;

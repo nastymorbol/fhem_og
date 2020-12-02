@@ -1,5 +1,8 @@
 ##############################################
-# $Id: 00_BACnetDevice.pm 14448 2020-12-02 03:44:40 sschulze $
+# $Id: 00_BACnetDevice.pm 14504 2020-12-02 03:49:00 sschulze $
+# History
+# 2020-12-02 encoding attribute hinzugefügt
+
 package main;
 
 use strict;
@@ -266,7 +269,7 @@ BACnetDevice_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
 
-  $hash->{VERSION} = "2020-12-02_03:44:40"
+  $hash->{VERSION} = "2020-12-02_03:49:00"
 
   my $name = shift @a;
   my $type = shift @a;
