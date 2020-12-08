@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 19185 2020-12-02 04:01:40 sschulze $
+# $Id: 00_OPENgate.pm 19335 2020-12-08 21:07:09 sschulze $
 package main;
 
 use strict;
@@ -143,7 +143,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2020-12-02_04:01:40";
+  $hash->{VERSION} = "2020-12-08_21:07:09";
 
   return undef;
 }
