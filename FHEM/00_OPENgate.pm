@@ -275,10 +275,14 @@ OPENgate_InitMqtt($)
 #          fhem("modify MqttClient rmt01.deos-ag.com:8883");
           fhem("save") if $init_done;
         }
-        readingsSingleUpdate($hash, "state", "OK", 1);
-        readingsSingleUpdate($hash, "username", $username, 1);
-        readingsSingleUpdate($hash, "gatewayId", $gatewayId, 1);
+        readingsBeginUpdate($hash);
+        readingsBulkUpdateIfChanged($hash, "state", "OK");
+        readingsEndUpdate($hash, 1);
       }
+      readingsBeginUpdate($hash);
+      readingsBulkUpdateIfChanged($hash, "username", $username);
+      readingsBulkUpdateIfChanged($hash, "gatewayId", $gatewayId);
+      readingsEndUpdate($hash, 1);
     }
 
     my $mqttCli = $defs{MqttCli};

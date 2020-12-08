@@ -1,4 +1,7 @@
 OPENgate last changes:
+2020-12-08
+ - ClientId wird nun conitnuerlich eingetragen
+ 
 2020-12-02
  - BACnetDevice     Encoding ist nun übersteuerbar (BACnetDriver Version > 0.0.6.6)
  - BACnetDatapoint  CommandQueue optimiert (BACnetDriver Version > 0.0.6.6)
