@@ -93,7 +93,7 @@ getFiles($$) {
 
     my $revision = int($size);
 
-    $id = "# \$Id: $filename $revision $date $time sschulze \$";
+    $id = "# \$Id: $filename $revision $date $time"."Z sschulze \$";
     @lines[1] = $id;
 
     # Open a file named "output.txt"; die if there's an error

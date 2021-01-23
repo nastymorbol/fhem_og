@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_BACnetDatapoint.pm 10429 2020-12-02 04:01:40 sschulze $
+# $Id: 00_BACnetDatapoint.pm 10725 2021-01-22 22:23:25Z sschulze $
 # History
 # 2020-12-02 CLI Commandos Encoding Problem behoben
 package main;
@@ -58,7 +58,11 @@ BACnetDatapoint_Set($$)
     my $value = join ' ', @a;
     $hash->{DriverReq} = "Write Property $cmd -> $value";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    readingsSingleUpdate($hash, $cmd, $value, 1);
+    
+    # 22.01.2021
+    # Reading nicht mehr direkt durch FHEM updaten
+    # readingsSingleUpdate($hash, $cmd, $value, 1);
+    
     return undef;
   }
   elsif($cmd =~ /prop_outOfService|prop_alarmValue/)
@@ -66,7 +70,9 @@ BACnetDatapoint_Set($$)
     my $value = shift @a;
     $hash->{DriverReq} = "Write Property $cmd -> $value";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    readingsSingleUpdate($hash, $cmd, $value, 1);
+    # 22.01.2021
+    # Reading nicht mehr direkt durch FHEM updaten
+    # readingsSingleUpdate($hash, $cmd, $value, 1);
     return undef;
   }  
   elsif($cmd eq "prop_limitEnable")
@@ -95,7 +101,9 @@ BACnetDatapoint_Set($$)
       $le .= "0";
     }
 
-    readingsSingleUpdate($hash, $cmd, $value, 1);
+    # 22.01.2021
+    # Reading nicht mehr direkt durch FHEM updaten
+    # readingsSingleUpdate($hash, $cmd, $value, 1);
     return undef;
   }
   elsif($cmd eq "pollIntervall")
@@ -113,8 +121,10 @@ BACnetDatapoint_Set($$)
     $hash->{DriverRes} = join ' ', @a;
     if($rcmd eq "Write" and $rerr eq "OK")
     {
-      my $bacProp = "prop_" . $rprop;
-      readingsSingleUpdate($hash, $bacProp, $rval, 1);
+      # my $bacProp = "prop_" . $rprop;
+      # 22.01.2021
+      # Reading nicht mehr direkt durch FHEM updaten
+      # readingsSingleUpdate($hash, $bacProp, $rval, 1);
     }
 
     # Der Treiber schickt nach efolgter Ausführung eines Befehls eine Respons welche mit 
@@ -197,7 +207,7 @@ BACnetDatapoint_Define($$)
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
 
-  $hash->{VERSION} = "2020-12-02_04:01:40";
+  $hash->{VERSION} = "2021-01-22_22:23:25";
 
   my $name = shift @a;
   my $type = shift @a;
