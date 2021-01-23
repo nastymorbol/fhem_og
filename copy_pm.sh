@@ -1,11 +1,12 @@
 #!/bin/bash
 
-array=( "00_BACnetDatapoint.pm" "00_BACnetDevice.pm" "00_BACnetNetwork.pm" "00_OPENgate.pm" "deos_00_mqtt.cfg")
+array=( "00_BACnetDatapoint.pm" "00_BACnetDevice.pm" "00_BACnetNetwork.pm" "00_OPENgate.pm")
 
 user=deos
 ip=192.168.123.59
 #ip=172.20.47.200
-id="~/.ssh/test_rsa"
+#id="~/.ssh/test_rsa"
+id="~/.ssh/id_rsa"
 
 ssh $user@$ip -i $id "sudo bash -c 'mkdir /tmp/fhem; chown -R deos:deos /tmp/fhem'"
 

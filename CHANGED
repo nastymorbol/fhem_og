@@ -1,11 +1,32 @@
 OPENgate last changes:
- 2020-10-05
+2021-01-23
+ - Die prop_Readings werden nun nur noch durch den BACnet Treiber aktualisiert
+
+2020-12-08
+ - ClientId wird nun conitnuerlich eingetragen
+ 
+2020-12-02
+ - BACnetDevice     Encoding ist nun übersteuerbar (BACnetDriver Version > 0.0.6.6)
+ - BACnetDatapoint  CommandQueue optimiert (BACnetDriver Version > 0.0.6.6)
+
+2020-11-28
+ - Shell befehle timeout anpassbar
+
+2020-11-24
+ - Slider für Analog-Werte entfernt
+ 
+2020-11-03
+ - Shell Befehle werden nun mit timeout von 5s gestartet
+ - Shell Befehle return code im ShellCommandRetCode Internal
+ - AutoUpdater aus config entfernt
+ 
+2020-10-05
  - Alle DriverReq wird nun zusammen geschrieben
 
- 2020-09-25
+2020-09-25
  - Über ein BACnet Device können nun alle Objekte des Devices beschrieben werden
  
- 2020-09-24
+2020-09-24
  - Changed Log function in OPENgate.pm
  - NofitfyRegexChanged
  - MQTT Configuration added

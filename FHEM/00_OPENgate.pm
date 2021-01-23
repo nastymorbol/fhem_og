@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20665 2020-06-19 11:05:35Z sschulze $
+# $Id: 00_OPENgate.pm 19335 2020-12-08 21:07:09 sschulze $
 package main;
 
 use strict;
@@ -19,8 +19,6 @@ OPENgate_Initialize($)
   );
   use warnings 'qw';
   $hash->{AttrList} = join(" ", @attrList)." $readingFnAttributes";
-
-  $hash->{VERSION}     = "2020-08-05_12:00:35";
 }
 
 ###################################
@@ -64,15 +62,34 @@ OPENgate_Set($@)
   # Execut Shell Command ....
   if($prop eq "sh")
   {
+    my $timeout = shift @a;
+    if($timeout eq 'timeout') {
+      $timeout = shift @a;
+    }
+    else{
+      unshift @a, $timeout;
+      $timeout = 10;
+    }
+
     my $payload = join(" ", @a);
-    return OPENgate_SshCommand($hash, $payload, undef);
+    return OPENgate_SshCommand($hash, $payload, $timeout, undef);
   }
 
   # Execut Shell Command ....
   if($prop eq "sush")
   {
+    my $timeout = shift @a;
+    if($timeout eq 'timeout') {
+      $timeout = shift @a;
+    }
+    else{
+      unshift @a, $timeout;
+      $timeout = 10;
+    }
+
+
     my $payload = join(" ", @a);
-    return OPENgate_SshCommand($hash, $payload, "1");
+    return OPENgate_SshCommand($hash, $payload, $timeout, "1");
   }
 
   my $value = join(" ", @a);  
@@ -125,6 +142,8 @@ OPENgate_Define($$)
   return "Wrong syntax: use define <name> OPENgate" if(int(@a) != 2);
 
   $hash->{NOTIFYDEV} = "global";
+
+  $hash->{VERSION} = "2020-12-08_21:07:09";
 
   return undef;
 }
@@ -256,10 +275,14 @@ OPENgate_InitMqtt($)
 #          fhem("modify MqttClient rmt01.deos-ag.com:8883");
           fhem("save") if $init_done;
         }
-        readingsSingleUpdate($hash, "state", "OK", 1);
-        readingsSingleUpdate($hash, "username", $username, 1);
-        readingsSingleUpdate($hash, "gatewayId", $gatewayId, 1);
+        readingsBeginUpdate($hash);
+        readingsBulkUpdateIfChanged($hash, "state", "OK");
+        readingsEndUpdate($hash, 1);
       }
+      readingsBeginUpdate($hash);
+      readingsBulkUpdateIfChanged($hash, "username", $username);
+      readingsBulkUpdateIfChanged($hash, "gatewayId", $gatewayId);
+      readingsEndUpdate($hash, 1);
     }
 
     my $mqttCli = $defs{MqttCli};
@@ -334,23 +357,55 @@ OPENgate_InitMqtt($)
   return undef;
 }
 
+# ------------ SHELL COMMANDS -------------
+
 sub
 OPENgate_SshCommand(@)
 {
-  my ($hash, $command, $sudo) = @_;  
+  my ($hash, $command, $timeout, $sudo) = @_;  
   if(defined($sudo))
   {
     my $qxcmd = "ssh -i /opt/fhem/.ssh/id_ed25519 deos\@host.docker.internal \"sudo bash -c \'$command\'\"";
-    $hash->{ShellCommand} = $command;    
-    $hash->{ShellCommandRes} = qx($qxcmd);
+    $hash->{ShellCommand} = $command;
+    my @result = exec_safe($qxcmd, $timeout, 3);
+    my $ret = pop(@result);
+    $hash->{ShellCommandRes} = join("\n", @result); #qx($qxcmd);
+    $hash->{ShellCommandRetCode} = $ret;
   }
   else
   {
     my $qxcmd = "ssh -i /opt/fhem/.ssh/id_ed25519 deos\@host.docker.internal \"bash -c \'$command\'\"";
     $hash->{ShellCommand} = $command;    
-    $hash->{ShellCommandRes} = qx($qxcmd);
+    my @result = exec_safe($qxcmd, $timeout, 3);
+    my $ret = pop(@result);
+    $hash->{ShellCommandRes} = join("\n", @result); #qx($qxcmd);
+    $hash->{ShellCommandRetCode} = $ret;
   }
   return $hash->{ShellCommandRes};
+}
+
+sub exec_safe {
+	my ($command, $timeout, $nice_val) = @_;
+	my @return_val;
+	eval {
+		local $SIG{ALRM} = sub { die "Timeout\n" };
+		alarm $timeout;
+		@return_val= `nice -n $nice_val $command 2>&1`;
+		alarm 0;
+	};
+	if($@) { # If command fails, return non-zero and msg
+		die unless $@ eq "Timeout\n";   # propagate unexpected errors
+		return ("Command timeout", 1);
+	} else {
+    my $ret = $?;
+    if($ret == -1) {
+  		chomp @return_val; push(@return_val, 0);
+    }
+    else {
+  		chomp @return_val; push(@return_val, $? >> 8);
+    }
+		return @return_val;
+	}
 }
 
 # ------------ START COMMAND CLI -------------

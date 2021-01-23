@@ -1,5 +1,5 @@
 ##############################################
-# $Id: myUtilsTemplate.pm 21509 2020-03-25 11:20:51Z rudolfkoenig $
+# $Id: 99_myUtils.pm 1617 2020-12-02 03:44:40 sschulze $
 #
 # Save this file as 99_myUtils.pm, and create your own functions in the new
 # file. They are then available in every Perl expression.
@@ -70,10 +70,5 @@ mqttCommand($$$$)
 		
 	return { sessionId=>$session_id, command=>$command, state=>FmtDateTime(time()) };
 }
-
-
-
-
-
 
 1;

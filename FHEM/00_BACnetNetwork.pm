@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 98_dummy.pm 16965 2018-07-09 07:59:58Z rudolfkoenig $
+# $Id: 00_BACnetNetwork.pm 7676 2020-12-02 04:01:40 sschulze $
 package main;
 
 use strict;
@@ -18,8 +18,6 @@ BACnetNetwork_Initialize($)
                        "disable disabledForIntervals " .
                        "ip port deviceInstance autocreateDevices " .                       
                        $readingFnAttributes;
-
-  $hash->{VERSION}     = "2020-08-05_12:00:35";
 }
 
 ###################################
@@ -160,6 +158,7 @@ BACnetNetwork_Define($$)
 
   return "Wrong syntax: use define <name> BACnetNetwork DeviceInstance IP[:Port]" if(int(@a) != 3);
 
+  $hash->{VERSION} = "2020-12-02_04:01:40";
 
   if(AttrVal($name,"room",undef)) {
     

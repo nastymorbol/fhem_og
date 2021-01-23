@@ -1,5 +1,8 @@
 ##############################################
-# $Id: 98_dummy.pm 16965 2018-07-09 07:59:58Z rudolfkoenig $
+# $Id: 00_BACnetDevice.pm 14505 2020-12-02 04:01:40 sschulze $
+# History
+# 2020-12-02 encoding attribute hinzugefügt
+
 package main;
 
 use strict;
@@ -17,10 +20,9 @@ BACnetDevice_Initialize($)
   $hash->{AttrList}  = "readingList " .
                        "disable disabledForIntervals " .
                        "notificationClasses notificationClassRegistrations covRegisterOnObjects " .
-                       "registrationIntervall sendWhoIsIntervall useStaticBinding " .                       
+                       "registrationIntervall sendWhoIsIntervall useStaticBinding encoding " .                       
                        $readingFnAttributes;
 
-  $hash->{VERSION}     = "2020-09-24_15:48:15";  
 }
 
 ###################################
@@ -267,6 +269,8 @@ BACnetDevice_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
 
+  $hash->{VERSION} = "2020-12-02_04:01:40";
+
   my $name = shift @a;
   my $type = shift @a;
 
@@ -436,6 +440,14 @@ BACnetDevice_Define($$)
     <li><a href="#disable">disable</a></li>
     <li><a href="#disabledForIntervals">disabledForIntervals</a></li>
 
+    <li><a name="encoding">encoding</a><br>
+      Wenn angegeben so wird für die BACnet Kommunikation das angebene Encoding verwendet. Dies kann bei BACnet Devices erforderlich sein, welche
+      ein nicht BACnet Konformes Encoding verwenden.
+      <br>
+      Es kann sowohl die Encoding Id als auch der Encoding Name angeben werden.
+      <br>
+      Wird das Encoding erforderlich erkannt, so wird das Reading encodingOverride mit dem Namen des Encodings gesetzt.
+    </li>
 
     <li><a name="setList">setList</a><br>
       Liste mit Werten durch Leerzeichen getrennt. Diese Liste wird mit "set

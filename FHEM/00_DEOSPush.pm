@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 98_dummy.pm 16965 2018-07-09 07:59:58Z rudolfkoenig $
+# $Id: 00_DEOSPush.pm 11828 2020-12-02 04:01:40 sschulze $
 package main;
 
 use HttpUtils;
@@ -23,8 +23,6 @@ DEOSPush_Initialize($)
   $hash->{AttrList}  =  "disable disabledForIntervals " .
                         "reporterId token serverId serverName " .
                        $readingFnAttributes;
-
-  $hash->{VERSION}     = "2020-06-11_19:26:51";
 }
 
 ###################################
@@ -264,6 +262,8 @@ DEOSPush_Define($$)
 	my @a = split( "[ \t][ \t]*", $def );
 
   return "Wrong syntax: use define <name> DEOSPush" if(int(@a) != 2);
+
+  $hash->{VERSION} = "2020-12-02_04:01:40";
 
   my $name = $hash->{NAME};
 
