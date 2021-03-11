@@ -1,8 +1,8 @@
 ##############################################
-# $Id: 00_BACnetDevice.pm 13950 2021-03-10 15:23:26Z sschulze $
+# $Id: 00_BACnetDevice.pm 13873 2021-03-11 11:42:10Z sschulze $
 # History
 # 2020-12-02 encoding attribute hinzugefügt
-# 2021-03-10 DriverRes wird nicht mehr getrieggert
+# 2021-03-10 DriverRes wird nicht mehr getriggert
 
 package main;
 
@@ -57,7 +57,6 @@ BACnetDevice_Get($$$)
   {
     $hash->{DriverReq} = "CMD:Get$opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    #readingsSingleUpdate($hash,"state", "CMD:Get Object List",1);
     return undef;
   }
 
@@ -195,7 +194,6 @@ BACnetDevice_Set($$)
     if($hash->{DriverRes} ne $value)
     {
       $hash->{DriverRes} = $value;
-      #DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
     }
     return undef;
   }
@@ -255,7 +253,7 @@ BACnetDevice_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
 
-  $hash->{VERSION} = "2021-03-10_15:23:26";
+  $hash->{VERSION} = "2021-03-11_11:42:10";
 
   my $name = shift @a;
   my $type = shift @a;
