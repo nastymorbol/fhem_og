@@ -1,5 +1,7 @@
 ##############################################
-# $Id: 00_BACnetNetwork.pm 7676 2020-12-02 04:01:40 sschulze $
+# $Id: 00_BACnetNetwork.pm 7737 2021-03-11 11:19:42Z sschulze $
+# History
+# 2021-03-10 DriverRes wird nicht mehr getrieggert
 package main;
 
 use strict;
@@ -158,7 +160,7 @@ BACnetNetwork_Define($$)
 
   return "Wrong syntax: use define <name> BACnetNetwork DeviceInstance IP[:Port]" if(int(@a) != 3);
 
-  $hash->{VERSION} = "2020-12-02_04:01:40";
+  $hash->{VERSION} = "2021-03-11_11:19:42";
 
   if(AttrVal($name,"room",undef)) {
     

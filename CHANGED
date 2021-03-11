@@ -1,4 +1,7 @@
 OPENgate last changes:
+2021-03-11
+ - OPENgate         Prblem mit BACnetDriver restart behoben
+
 2021-01-23
  - Die prop_Readings werden nun nur noch durch den BACnet Treiber aktualisiert
 

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 19412 2021-03-11 11:15:39Z sschulze $
+# $Id: 00_OPENgate.pm 19413 2021-03-11 11:16:13Z sschulze $
 # History
 # 2021-03-12 BACnet driver restart - timeout problem resolved
 
@@ -146,7 +146,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-03-11_11:15:39";
+  $hash->{VERSION} = "2021-03-11_11:16:13";
 
   return undef;
 }
