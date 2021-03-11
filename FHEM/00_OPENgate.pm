@@ -1,5 +1,8 @@
 ##############################################
-# $Id: 00_OPENgate.pm 19335 2020-12-08 21:07:09 sschulze $
+# $Id: 00_OPENgate.pm 19412 2021-03-11 11:15:39Z sschulze $
+# History
+# 2021-03-12 BACnet driver restart - timeout problem resolved
+
 package main;
 
 use strict;
@@ -55,7 +58,7 @@ OPENgate_Set($@)
   if($prop eq "bacnetDriver")
   {
     my $payload = join(" ", @a);
-    OPENgate_SshCommand($hash, "docker restart runtime_bacnetnf_1", "1");
+    OPENgate_SshCommand($hash, "docker restart runtime_bacnetnf_1", 30, "1");
     return undef;#$hash->{ShellCommandRes};
   }
 
@@ -143,7 +146,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2020-12-08_21:07:09";
+  $hash->{VERSION} = "2021-03-11_11:15:39";
 
   return undef;
 }

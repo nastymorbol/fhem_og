@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_BACnetDatapoint.pm 10725 2021-01-22 22:23:25Z sschulze $
+# $Id: 00_BACnetDatapoint.pm 10707 2021-03-10 15:13:25Z sschulze $
 # History
 # 2020-12-02 CLI Commandos Encoding Problem behoben
 package main;
@@ -116,20 +116,13 @@ BACnetDatapoint_Set($$)
   }
   elsif($cmd =~ /DriverRes/)
   {
-    my ($rcmd, $rprop, $rval, $rerr) = @a;
-    #my $value = join ' ', @a;
-    $hash->{DriverRes} = join ' ', @a;
-    if($rcmd eq "Write" and $rerr eq "OK")
-    {
-      # my $bacProp = "prop_" . $rprop;
-      # 22.01.2021
-      # Reading nicht mehr direkt durch FHEM updaten
-      # readingsSingleUpdate($hash, $bacProp, $rval, 1);
-    }
+    #my ($rcmd, $rprop, $rval, $rerr) = @a;
+    my $value = join ' ', @a;
+    #$hash->{DriverRes} = join ' ', @a;
 
     # Der Treiber schickt nach efolgter Ausführung eines Befehls eine Respons welche mit 
     # done endet
-    if($hash->{DriverRes} =~ /done/)
+    if($value =~ /done/)
     {
       if($hash->{DriverReq} ne "done")
       {
@@ -138,19 +131,24 @@ BACnetDatapoint_Set($$)
       }
     }
 
+    # 2021-03-10 Das ist nicht mehr nötig, da der Treiber nur noch ereigniss gesteuert getriggert wird
     # Der Treiber schickt unmittelbar nach empfang eines Commandos auf dem DriverReq
     # eine Empfangsbestätigung auf DriverRes mit dem Commando + exec
     # In dem Fall muss der Request um exec erweitert werden, damit befehle nicht doppelt gestartet werden
-    if($hash->{DriverRes} =~ /exec/)
+    #if($hash->{DriverRes} =~ /exec/)
+    #{
+    #  if($hash->{DriverReq} !~ "exec")
+    #  {
+    #    $hash->{DriverReq} .= " exec" ;
+    #    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    #  }
+    #}
+    if($hash->{DriverRes} ne $value)
     {
-      if($hash->{DriverReq} !~ "exec")
-      {
-        $hash->{DriverReq} .= " exec" ;
-      }
-      DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+      $hash->{DriverRes} = $value;
+      DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
     }
-
-    DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
+    return undef;
   }
   elsif($cmd =~ /urn/)
   {
@@ -206,8 +204,7 @@ BACnetDatapoint_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
-
-  $hash->{VERSION} = "2021-01-22_22:23:25";
+  $hash->{VERSION} = "2021-03-10_15:13:25";
 
   my $name = shift @a;
   my $type = shift @a;

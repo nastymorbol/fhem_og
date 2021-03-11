@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_BACnetDevice.pm 14505 2020-12-02 04:01:40 sschulze $
+# $Id: 00_BACnetDevice.pm 13950 2021-03-10 15:23:26Z sschulze $
 # History
 # 2020-12-02 encoding attribute hinzugefügt
 
@@ -178,39 +178,24 @@ BACnetDevice_Set($$)
 
   if($cmd =~ /DriverRes/)
   {
-    my ($rcmd, $rprop, $rval, $rerr) = @a;
-    $hash->{DriverRes} = join ' ', @a;
+    my $value = join ' ', @a;
+    #$hash->{DriverRes} = join ' ', @a;
 
     # Der Treiber schickt nach efolgter Ausführung eines Befehls eine Respons welche mit 
     # done endet
-    if($hash->{DriverRes} =~ /done/)
+    if($value =~ /done/)
     {
       if($hash->{DriverReq} ne "done")
       {
         $hash->{DriverReq} = "done" ;
+        DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
       }
     }
-
-    # Der Treiber schickt unmittelbar nach empfang eines Commandos auf dem DriverReq
-    # eine Empfangsbestätigung auf DriverRes mit dem Commando + exec
-    # In dem Fall muss der Request um exec erweitert werden, damit befehle nicht doppelt gestartet werden
-    if($hash->{DriverRes} =~ /exec/)
+    if($hash->{DriverRes} ne $value)
     {
-      if($hash->{DriverReq} !~ /exec/)
-      {
-        $hash->{DriverReq} = $hash->{DriverReq} =~ s/CMD://r;
-        $hash->{DriverReq} .= " > exec" ;
-      }
+      $hash->{DriverRes} = $value;
+      #DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
     }
-
-    if($rcmd eq "Write" and $rerr eq "OK")
-    {
-      my $bacProp = "prop_" . $rprop;
-      readingsSingleUpdate($hash, $bacProp, $rval, 1);
-    }
-    DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
-    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-  
     return undef;
   }
 
@@ -269,7 +254,7 @@ BACnetDevice_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
 
-  $hash->{VERSION} = "2020-12-02_04:01:40";
+  $hash->{VERSION} = "2021-03-10_15:23:26";
 
   my $name = shift @a;
   my $type = shift @a;
