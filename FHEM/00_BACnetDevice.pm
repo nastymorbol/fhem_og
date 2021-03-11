@@ -2,6 +2,7 @@
 # $Id: 00_BACnetDevice.pm 13950 2021-03-10 15:23:26Z sschulze $
 # History
 # 2020-12-02 encoding attribute hinzugefügt
+# 2021-03-10 DriverRes wird nicht mehr getrieggert
 
 package main;
 
