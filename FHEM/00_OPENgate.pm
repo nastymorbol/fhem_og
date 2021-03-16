@@ -1,7 +1,9 @@
 ##############################################
-# $Id: 00_OPENgate.pm 19413 2021-03-11 11:16:13Z sschulze $
+# $Id: 00_OPENgate.pm 19532 2021-03-16 19:11:51Z sschulze $
 # History
+# 2021-03-16 Perl Warning eliminated
 # 2021-03-12 BACnet driver restart - timeout problem resolved
+# 2021-03-12 SetCovMessage returns now immidiatialy
 
 package main;
 
@@ -36,7 +38,7 @@ OPENgate_Set($@)
     gatewayId
     username
     password
-    log:uzsuDropDown,active,inactive
+    'log:uzsuDropDown,active,inactive'
     covMessage
     bacnetDriver
   );
@@ -53,16 +55,17 @@ OPENgate_Set($@)
       postMqttPayload("/data/telemetry", $payload);
       readingsSingleUpdate($hash, "lastCovMessage", gettimeofday(), 1);
     }
+    return undef;
   }
 
   if($prop eq "bacnetDriver")
   {
-    my $payload = join(" ", @a);
-    OPENgate_SshCommand($hash, "docker restart runtime_bacnetnf_1", 30, "1");
-    return undef;#$hash->{ShellCommandRes};
+    #my $payload = join(" ", @a);
+    return OPENgate_SshCommand($hash, "docker restart runtime_bacnetnf_1", 30, "1");
+    #return undef;#$hash->{ShellCommandRes};
   }
 
-  # Execut Shell Command ....
+  # Execute Shell Command ....
   if($prop eq "sh")
   {
     my $timeout = shift @a;
@@ -146,7 +149,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-03-11_11:16:13";
+  $hash->{VERSION} = "2021-03-16_19:11:51";
 
   return undef;
 }
