@@ -4,7 +4,8 @@ array=( "00_BACnetDatapoint.pm" "00_BACnetDevice.pm" "00_BACnetNetwork.pm" "00_O
 
 user=deos
 #ip=192.168.123.59
-ip=172.20.47.200
+#ip=172.20.47.200
+ip=172.20.37.51
 #id="~/.ssh/test_rsa"
 id="~/.ssh/id_rsa"
 

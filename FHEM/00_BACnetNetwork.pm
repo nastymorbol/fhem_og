@@ -1,7 +1,10 @@
 ##############################################
-# $Id: 00_BACnetNetwork.pm 7738 2021-03-11 11:20:02Z sschulze $
+# $Id: 00_BACnetNetwork.pm 7938 2021-04-12 17:22:33Z sschulze $
 # History
+# 2021-04-12 DriverReq wurde immer wieder neu getriggert
+#            Get für ScanNetwork entfernt
 # 2021-03-10 DriverRes wird nicht mehr getrieggert
+
 package main;
 
 use strict;
@@ -29,7 +32,9 @@ BACnetNetwork_Get($$$)
   my ( $hash, $name, $opt, @args ) = @_;
 
 	return "\"get $name\" needs at least one argument" unless(defined($opt));
-
+  
+  return undef;
+  
   if($opt eq "ScanNetwork")
 	{    
     $hash->{DriverReq} = "CMD:Get$opt";
@@ -38,6 +43,7 @@ BACnetNetwork_Get($$$)
   }
 
   return "unknown argument choose one of ScanNetwork:noArg";
+
 }
 
 ###################################
@@ -112,6 +118,7 @@ BACnetNetwork_Set($@)
       if($hash->{DriverReq} ne "done")
       {
         $hash->{DriverReq} = "done" ;
+        DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
       }
     }
 
@@ -122,18 +129,19 @@ BACnetNetwork_Set($@)
     {
       if($hash->{DriverReq} !~ /exec/)
       {
-        $hash->{DriverReq} = $hash->{DriverReq} =~ s/CMD://r;
+        #$hash->{DriverReq} = $hash->{DriverReq} =~ s/CMD://r;
         $hash->{DriverReq} .= " > exec" ;
+        DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
       }
     }
 
-    if($rcmd eq "Write" and $rerr eq "OK")
-    {
-      my $bacProp = "prop_" . $rprop;
-      readingsSingleUpdate($hash, $bacProp, $rval, 1);
-    }
+    #if($rcmd eq "Write" and $rerr eq "OK")
+    #{
+    #  my $bacProp = "prop_" . $rprop;
+    #  readingsSingleUpdate($hash, $bacProp, $rval, 1);
+    #}
 
-    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    
     DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
   
     return undef;
@@ -160,7 +168,7 @@ BACnetNetwork_Define($$)
 
   return "Wrong syntax: use define <name> BACnetNetwork DeviceInstance IP[:Port]" if(int(@a) != 3);
 
-  $hash->{VERSION} = "2021-03-11_11:20:02";
+  $hash->{VERSION} = "2021-04-12_17:22:33";
 
   if(AttrVal($name,"room",undef)) {
     
