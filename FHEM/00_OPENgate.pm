@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 19532 2021-03-16 19:11:51Z sschulze $
+# $Id: 00_OPENgate.pm 19630 2021-05-03 15:45:26Z sschulze $
 # History
+# 2021-05-03 External MQTT Driver prepare
 # 2021-03-16 Perl Warning eliminated
 # 2021-03-12 BACnet driver restart - timeout problem resolved
 # 2021-03-12 SetCovMessage returns now immidiatialy
@@ -151,7 +152,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-03-16_19:11:51";
+  $hash->{VERSION} = "2021-05-03_15:45:26";
 
   return undef;
 }
