@@ -111,6 +111,8 @@ OPENgate_Set($@)
 
   if($prop eq "log")
   {
+    return "Log driver not supported";
+
     if($value eq "active")
     {
       notifyRegexpChanged($hash, ".*");
@@ -234,6 +236,7 @@ OPENgate_InitMqtt($)
   $hash->{username} = $username ? "OK" : "ERROR";
   $hash->{password} = $password ? "OK" : "ERROR";
 
+  return undef;
   #my $gatewayId = AttrVal("MqttClient", "clientId", undef);
 
   if($gatewayId && $username && $password)
