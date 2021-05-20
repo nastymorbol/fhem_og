@@ -1,4 +1,7 @@
 OPENgate last changes:
+2021-05-20
+ - OPENgate         Support for URN Set
+ - OPENweb          First init (Requires bacnetrt > 1.7.16)
 2021-05-03
  - OPENgate         External MQTT Driver prepare
 
