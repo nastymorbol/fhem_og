@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 19630 2021-05-03 15:45:26Z sschulze $
+# $Id: 00_OPENgate.pm 20092 2021-05-20 03:09:37Z sschulze $
 # History
+# 2021-05-20 Support for URN set
 # 2021-05-03 External MQTT Driver prepare
 # 2021-03-16 Perl Warning eliminated
 # 2021-03-12 BACnet driver restart - timeout problem resolved
@@ -18,7 +19,7 @@ OPENgate_Initialize($)
 
   $hash->{SetFn}     = "OPENgate_Set";
   $hash->{DefFn}     = "OPENgate_Define";
-  $hash->{NotifyFn}  = "OPENgate_Notify";
+#  $hash->{NotifyFn}  = "OPENgate_Notify";
   no warnings 'qw';
   my @attrList = qw(
     disable
@@ -39,7 +40,7 @@ OPENgate_Set($@)
     gatewayId
     username
     password
-    'log:uzsuDropDown,active,inactive'
+    log:uzsuDropDown,active,inactive
     covMessage
     bacnetDriver
   );
@@ -47,6 +48,25 @@ OPENgate_Set($@)
   return "Unknown argument ?, choose one of " . join(" ", @setList) if($a[0] eq "?");
   
   my $prop = shift @a;
+
+  if($prop =~ /urn/)
+  {
+    my $value = join ' ', @a;
+    if(defined($hash->{urn}))
+    {
+      if($hash->{urn} ne $value)
+      {
+        setKeyValue($name . "_urn", $value);
+        $hash->{urn} = $value;
+      }
+    }
+    else
+    {
+      setKeyValue($name . "_urn", $value);
+      $hash->{urn} = $value;
+    }
+    return "OK";
+  }
   
   if($prop eq "covMessage")
   {
@@ -152,8 +172,13 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-05-03_15:45:26";
+  $hash->{VERSION} = "2021-05-20_03:09:37";
 
+  my $urn = getKeyValue($hash->{NAME} . "_urn");
+  if($urn)
+  {
+    $hash->{urn} = $urn;
+  }
   return undef;
 }
 
