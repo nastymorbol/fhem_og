@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENweb.pm 8260 2021-05-20 03:08:42Z sschulze $
+# $Id: 00_OPENweb.pm 8035 2021-06-01 16:50:10Z sschulze $
 # History
 # 2021-05-20 Initital commit
 
@@ -195,7 +195,7 @@ OPENweb_Define($$)
 
   return "Wrong syntax: use define <name> OPENweb http[s]://ip[:port]" if(int(@a) != 2);
 
-  $hash->{VERSION} = "2021-05-20_03:08:42";
+  $hash->{VERSION} = "2021-06-01_16:50:10";
 
   if(AttrVal($name,"room", undef)) {
     

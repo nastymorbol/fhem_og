@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_BACnetDevice.pm 13873 2021-03-11 11:42:10Z sschulze $
+# $Id: 00_BACnetDevice.pm 14261 2021-06-02 12:02:53Z sschulze $
 # History
 # 2020-12-02 encoding attribute hinzugefügt
 # 2021-03-10 DriverRes wird nicht mehr getriggert
@@ -262,7 +262,7 @@ BACnetDevice_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
 
-  $hash->{VERSION} = "2021-03-11_11:42:10";
+  $hash->{VERSION} = "2021-06-02_12:02:53";
 
   my $name = shift @a;
   my $type = shift @a;
