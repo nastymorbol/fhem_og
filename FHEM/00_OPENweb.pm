@@ -174,19 +174,12 @@ sub OPENweb_Attr($$$$)
 	# $attrName/$attrValue sind Attribut-Name und Attribut-Wert
     
 	if ($cmd eq "set") {
-		if ($attrName eq "Regex") {
-			eval { qr/$attrValue/ };
-			if ($@) {
-				Log3 $name, 3, "X ($name) - Invalid regex in attr $name $attrName $attrValue: $@";
-				return "Invalid Regex $attrValue: $@";
-			}
-		}
     if ($attrName =~ "rec.*") {
       # json2nameValue('{"Interval":3600, "Controller":1, "Name":"My Receipe name on OPENweb"}')
 			my $json = json2nameValue($attrValue);
-      return "Error in 'Name' field ($attrValue)" if ($json->{Name} eq undef);
-      return "Error in 'Interval' field ($attrValue)" if ($json->{Interval} eq undef);
-      return "Error in 'Controller' field ($attrValue)" if ($json->{Controller} eq undef);
+      return "Error in 'Name' field ($attrValue)" if (not $json->{Name});
+      return "Error in 'Interval' field ($attrValue)" if (not $json->{Interval});
+      return "Error in 'Controller' field ($attrValue)" if (not $json->{Controller});
 		}
 	}
 	return undef;

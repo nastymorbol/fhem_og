@@ -48,7 +48,6 @@ BACnetDevice_Get($$$)
   {    
     $hash->{DriverReq} = "CMD:Get$opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    #readingsSingleUpdate($hash,"state", "CMD:Get Alarm Summary",1);
     return undef;
   }
 
@@ -107,7 +106,7 @@ BACnetDevice_Set($$)
     return undef;
   }
 
-  if($cmd =~ /objectList/) {
+  if($cmd =~ /ObjectList/) {
     my $data = join ' ', @a;
     
     #$attr{$name}{BV} = $data;
@@ -178,12 +177,12 @@ BACnetDevice_Set($$)
 
   if($cmd =~ /DriverRes/)
   {
-    my $value = join ' ', @a;
-    #$hash->{DriverRes} = join ' ', @a;
+    #my $value = join ' ', @a;
+    $hash->{DriverRes} = join ' ', @a;
 
     # Der Treiber schickt nach efolgter Ausführung eines Befehls eine Respons welche mit 
     # done endet
-    if($value =~ /done/)
+    if($hash->{DriverRes} =~ /done/)
     {
       if($hash->{DriverReq} ne "done")
       {
@@ -191,10 +190,20 @@ BACnetDevice_Set($$)
         DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
       }
     }
-    if($hash->{DriverRes} ne $value)
+
+    # Der Treiber schickt unmittelbar nach empfang eines Commandos auf dem DriverReq
+    # eine Empfangsbestätigung auf DriverRes mit dem Commando + exec
+    # In dem Fall muss der Request um exec erweitert werden, damit befehle nicht doppelt gestartet werden
+    if($hash->{DriverRes} =~ /exec/)
     {
-      $hash->{DriverRes} = $value;
+      if($hash->{DriverReq} !~ /exec/)
+      {
+        $hash->{DriverReq} .= " > exec" ;
+        DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+      }
     }
+
+    DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
     return undef;
   }
 
