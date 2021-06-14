@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20092 2021-05-20 03:09:37Z sschulze $
+# $Id: 00_OPENgate.pm 20491 2021-06-14 10:51:24Z sschulze $
 # History
+# 2021-06-14 Bug in Gateway Parameter setter
 # 2021-05-20 Support for URN set
 # 2021-05-03 External MQTT Driver prepare
 # 2021-03-16 Perl Warning eliminated
@@ -126,7 +127,7 @@ OPENgate_Set($@)
   {
     my $keyName = $hash->{NAME} . "_" . $prop;
     setKeyValue($keyName, $value);
-
+    
     return OPENgate_InitMqtt($hash);
   }
 
@@ -172,7 +173,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-05-20_03:09:37";
+  $hash->{VERSION} = "2021-06-14_10:51:24";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)
@@ -252,7 +253,7 @@ OPENgate_InitMqtt($)
   my ($hash) = @_;
   
   $hash->{MqttClientState} = "Init Start";
-  readingsSingleUpdate($hash, "state", "Init", 0);
+  readingsSingleUpdate($hash, "state", "Init", 1);
 
   my $gatewayId = getKeyValue($hash->{NAME} . "_gatewayId");
   my $username = getKeyValue($hash->{NAME} . "_username");
@@ -262,11 +263,19 @@ OPENgate_InitMqtt($)
   $hash->{username} = $username ? "OK" : "ERROR";
   $hash->{password} = $password ? "OK" : "ERROR";
 
-  return undef;
+  readingsBeginUpdate($hash);
+  readingsBulkUpdateIfChanged($hash, "username", $username);
+  readingsBulkUpdateIfChanged($hash, "gatewayId", $gatewayId);
+  readingsEndUpdate($hash, 1);
+  
+  readingsSingleUpdate($hash, "state", "Init done", 1);
+  $hash->{MqttClientState} = "Init done";
+  #return undef;
   #my $gatewayId = AttrVal("MqttClient", "clientId", undef);
 
   if($gatewayId && $username && $password)
   {
+    return $gatewayId . " : " . $username . " : " . $password;
     my $mqttClient = $defs{MqttClient};
     if( not defined ($mqttClient))
     {
