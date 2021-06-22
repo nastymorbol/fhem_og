@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20491 2021-06-14 10:51:24Z sschulze $
+# $Id: 00_OPENgate.pm 20552 2021-06-14 11:27:53Z sschulze $
 # History
 # 2021-06-14 Bug in Gateway Parameter setter
 # 2021-05-20 Support for URN set
@@ -173,7 +173,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-06-14_10:51:24";
+  $hash->{VERSION} = "2021-06-14_11:27:53";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)

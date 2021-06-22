@@ -1,6 +1,7 @@
 OPENgate last changes:
 2021-06-14
  - OPENgate         Bug in Gateway Parameter setter
+ - OPENgate         Return Cloud Settings
 
 2021-06-06
  - OPENgate         Event Trigger optimised
