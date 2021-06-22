@@ -398,6 +398,7 @@ OPENgate_InitMqtt($)
   return "Error - Username not set" if(not defined($username));
   return "Error - Password not set" if(not defined($password));
 
+  return $gatewayId . " : " . $username . " : " . $password;
   return undef;
 }
 
