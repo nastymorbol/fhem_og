@@ -1,4 +1,7 @@
 OPENgate last changes:
+2021-08-10
+ - BACnetDatapoint  Add prop_presentValue setter as default
+ 
 2021-06-14
  - OPENgate         Bug in Gateway Parameter setter
  - OPENgate         Return Cloud Settings

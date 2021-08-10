@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_BACnetDatapoint.pm 10707 2021-03-10 15:13:25Z sschulze $
+# $Id: 00_BACnetDatapoint.pm 10883 2021-08-10 12:37:36Z sschulze $
 # History
+# 2021-08-10 Add prop_presentValue setter as default
 # 2020-12-02 CLI Commandos Encoding Problem behoben
 package main;
 
@@ -188,6 +189,11 @@ BACnetDatapoint_Set($$)
     push @setList, "prop_presentValue:uzsuToggle,true,false";
     push @setList, "prop_alarmValue:uzsuToggle,true,false";
   }
+  else
+  {
+    # ToDo: Add special setter for MultiState Objects (State-Texts)
+    push @setList, "prop_presentValue";
+  }
 
   return join ' ', @setList;
   
@@ -204,7 +210,7 @@ BACnetDatapoint_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
-  $hash->{VERSION} = "2021-03-10_15:13:25";
+  $hash->{VERSION} = "2021-08-10_12:37:36";
 
   my $name = shift @a;
   my $type = shift @a;
