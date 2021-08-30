@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20552 2021-06-14 11:27:53Z sschulze $
+# $Id: 00_OPENgate.pm 20670 2021-08-30 13:46:11Z sschulze $
 # History
+# 2021-08-30 Problem while updateing MQTT Parameter
 # 2021-06-14 Bug in Gateway Parameter setter
 # 2021-05-20 Support for URN set
 # 2021-05-03 External MQTT Driver prepare
@@ -173,7 +174,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-06-14_11:27:53";
+  $hash->{VERSION} = "2021-08-30_13:46:11";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)
@@ -275,7 +276,7 @@ OPENgate_InitMqtt($)
 
   if($gatewayId && $username && $password)
   {
-    return $gatewayId . " : " . $username . " : " . $password;
+    #return $gatewayId . " : " . $username . " : " . $password;
     my $mqttClient = $defs{MqttClient};
     if( not defined ($mqttClient))
     {
@@ -358,7 +359,9 @@ OPENgate_InitMqtt($)
 
     readingsSingleUpdate($hash, "state", "OK", 0);
     $hash->{MqttClientState} = "OK";
-    return undef;
+
+    return $gatewayId . " : " . $username . " : " . $password;
+    #return undef;
   }
   else
   {

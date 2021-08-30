@@ -1,4 +1,7 @@
 OPENgate last changes:
+2021-08-30 
+ - OPENgate         Problem while updating MQTT Parameter
+
 2021-08-10
  - BACnetDatapoint  Add prop_presentValue setter as default
  
