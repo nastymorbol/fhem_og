@@ -1,7 +1,7 @@
 ##############################################
-# $Id: 00_OPENweb.pm 8032 2021-09-09 12:31:37Z sschulze $
+# $Id: 00_OPENems.pm 6305 2021-09-11 10:53:35Z sschulze $
 # History
-# 2021-05-20 Initital commit
+# 2021-09-11 Initital commit
 
 package main;
 
@@ -10,21 +10,21 @@ use warnings;
 use SetExtensions;
 
 sub
-OPENweb_Initialize($)
+OPENems_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{GetFn}     = "OPENweb_Get";
-  $hash->{SetFn}     = "OPENweb_Set";
-  $hash->{DefFn}     = "OPENweb_Define";
-  $hash->{AttrFn}    = "OPENweb_Attr";
-  $hash->{AttrList}  = "disable " .
+  $hash->{GetFn}     = "OPENems_Get";
+  $hash->{SetFn}     = "OPENems_Set";
+  $hash->{DefFn}     = "OPENems_Define";
+  $hash->{AttrFn}    = "OPENems_Attr";
+  $hash->{AttrList}  = "disable slot-[0-9]+-.* " .
                        $readingFnAttributes;
 }
 
 ###################################
 sub
-OPENweb_Get($$$)
+OPENems_Get($$$)
 {
   my ( $hash, $name, $opt, @args ) = @_;
 
@@ -35,17 +35,17 @@ OPENweb_Get($$$)
 }
 
 ###################################
-sub OPENweb_isInt{
+sub OPENems_isInt{
 	return  ($_[0] =~/^-?\d+$/)?1:0;
 }
 
-sub OPENweb_isNotInt{
+sub OPENems_isNotInt{
 	return  ($_[0] =~/^-?\d+$/)?0:1;
 }
 
 
 sub
-OPENweb_Set($@)
+OPENems_Set($@)
 {
   my ($hash, @a) = @_;
   my $name = shift @a;
@@ -55,53 +55,14 @@ OPENweb_Set($@)
   my $cmd = shift @a;
   my @setList = ();
   
-  if($cmd eq "ScanRecipes")
+  if($cmd eq "ScanTrendSlots")
 	{    
-    $hash->{DriverReq} = "CMD:ScanRecipes";
+    $hash->{DriverReq} = "CMD:ScanTrendSlots";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return undef;
   }
-  push @setList, "ScanRecipes:noArg";
+  push @setList, "ScanTrendSlots:noArg";
   
-  if($cmd eq "AddReceipe")
-	{    
-    my $args = join ' ', @a;
-    # Anlage:Interval:Name
-
-    my @receipeData = split(':', $args, 3);
-    return "Wrong syntax: use set $name AddReceipe 0001:3600:MyReceipe" if(int(@receipeData) != 3);
-
-    my ($anlage, $interval, $receiptname) = @receipeData;
-
-    return "Wrong syntax: use set $name AddReceipe 0001:3600:My Receipe name on OPENweb\nAnlage is not an integer value ($anlage)" if OPENweb_isNotInt($anlage);
-    return "Wrong syntax: use set $name AddReceipe 0001:3600:MyReceipe\nInterval is not an integer value ($interval)" if OPENweb_isNotInt($interval);
-
-    my $attrib = makeReadingName('rec' . int($anlage) . ' ' . $receiptname);    
-    addToDevAttrList($name, $attrib);
-    my %attrval = (
-      Name => $receiptname,
-      Interval => int($interval),
-      Controller => int($anlage)
-    );
-    
-    my $json = toJSON(\%attrval);
-    my $oldVal = AttrVal($name, $attrib, "");
-
-    #readingsSingleUpdate($hash, "my_recipe", "N: $json | O: $oldVal", 1);
-
-    if($json ne $oldVal)
-    {
-      # Event triggern ... Global global ATTR myOpenWeb rec3_bla
-      # $attr{$name}{$attrib} = toJSON(\%attrval);
-      my $res = CommandAttr($hash, $name . " " . $attrib . " " . $json);
-      #readingsSingleUpdate($hash, "my_CommandAttr", $res, 1);
-      CommandSave($hash, undef);# if (AttrVal("global", "autosave", 1));
-    }
-
-    return undef;
-  }
-  push @setList, "AddReceipe";
-
   if($cmd =~ /urn/)
   {
     my $value = join ' ', @a;
@@ -165,7 +126,7 @@ OPENweb_Set($@)
   return undef;
 }
 
-sub OPENweb_Attr($$$$)
+sub OPENems_Attr($$$$)
 {
 	my ( $cmd, $name, $attrName, $attrValue ) = @_;
     
@@ -174,40 +135,40 @@ sub OPENweb_Attr($$$$)
 	# $attrName/$attrValue sind Attribut-Name und Attribut-Wert
     
 	if ($cmd eq "set") {
-    if ($attrName =~ "rec.*") {
-      # json2nameValue('{"Interval":3600, "Controller":1, "Name":"My Receipe name on OPENweb"}')
-			my $json = json2nameValue($attrValue);
-      return "Error in 'Name' field ($attrValue)" if (not $json->{Name});
-      return "Error in 'Interval' field ($attrValue)" if (not $json->{Interval});
-      return "Error in 'Controller' field ($attrValue)" if (not $json->{Controller});
+    if ($attrName =~ "slot_.*_name") {
+      # json2nameValue('{"Interval":3600, "Controller":1, "Name":"My Receipe name on OPENems"}')
+			#my $json = json2nameValue($attrValue);
+      #return "Error in 'Name' field ($attrValue)" if (not $json->{Name});
+      #return "Error in 'Interval' field ($attrValue)" if (not $json->{Interval});
+      #return "Error in 'Controller' field ($attrValue)" if (not $json->{Controller});
 		}
 	}
 	return undef;
 }
 
 sub
-OPENweb_Define($$)
+OPENems_Define($$)
 {
   my ($hash, $def) = @_;
   my @a = split("[ \t][ \t]*", $def);
 
   my $name = shift @a;
 
-  return "Wrong syntax: use define <name> OPENweb http[s]://ip[:port]" if(int(@a) != 2);
+  return "Wrong syntax: use define <name> OPENems http[s]://ip[:port]" if(int(@a) != 2);
 
-  $hash->{VERSION} = "2021-09-09_12:31:37";
+  $hash->{VERSION} = "2021-09-11_10:53:35";
 
   if(AttrVal($name,"room", undef)) {
     
   } else {
-    $attr{$name}{room} = 'OPENweb';
+    $attr{$name}{room} = 'OPENems';
   }
 
   my $type = shift @a;
   my $url = shift @a;
 
   if (index($url, 'http') == -1) {
-    return "Wrong syntax: use define <name> OPENweb http[s]://ip[:port]";
+    return "Wrong syntax: use define <name> OPENems http[s]://ip[:port]";
   }
   
   my $ipIndex = rindex($url, ':');
@@ -223,7 +184,6 @@ OPENweb_Define($$)
   
   $hash->{URL} = $url;
   $hash->{IP} = $ip;
-#  $hash->{ObjectId} = "openweb:$ip";
   $hash->{DriverReq} = "N/A";
   $hash->{DriverRes} = "N/A";
   $hash->{STATE} = "Init";
@@ -241,53 +201,45 @@ OPENweb_Define($$)
 
 =pod
 =item helper
-=item summary    OPENweb device
-=item summary_DE OPENweb Ger&auml;t
+=item summary    OPENems device
+=item summary_DE OPENems Ger&auml;t
 =begin html
 
-<a name="OPENweb"></a>
-<h3>OPENweb</h3>
+<a name="OPENems"></a>
+<h3>OPENems</h3>
 <ul>
 
-  Define a OPENweb. A OPENweb can take via <a href="#set">set</a> any values.
+  Define a OPENems. A OPENems can take via <a href="#set">set</a> any values.
   Used for programming.
   <br><br>
 
-  <a name="OPENwebdefine"></a>
+  <a name="OPENemsdefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; OPENweb &lt;URL&gt;</code>
+    <code>define &lt;name&gt; OPENems &lt;URL&gt;</code>
     <br><br>
 
     Example:
     <ul>
-      <code>define MyOPENweb OPENweb http://192.168.123.199</code><br>
-      <code>set MyOPENweb AddReceipe 1:60:My Receipe</code><br>
+      <code>define MyOPENems OPENems http://192.168.123.199</code><br>
+      <code>set MyOPENems ScanTrendSlots</code><br>
     </ul>
   </ul>
   <br>
 
   <b>Set</b>
-  <li><a name="AddReceipe"></a>
-    <code>set &lt;name&gt; AddReceipe &lt;1:60:My Receipe&gt</code><br>
-    Format for ReceipeInfo:<br/>
-    <p>
-      PlantIndex:UptateInterval[s]:ReceipeName <br/>
-      1:60:AHU001 <br/>
-    </p>
-    Adds or Updates an OPENweb Receipe information. <br/>
-    The Receipe Infos are stored in an Attribute named after the Receipe name.
-  </li>
-  <li><a name="ScanReceipes"></a>
-    <code>set &lt;name&gt; ScanReceipes [Interval]</code><br>
-    Not implemented yet.
+  <li><a name="ScanTrendSlots"></a>
+    <code>set &lt;name&gt; ScanTrendSlots</code><br>
+    Scans all Trend Slots Configruations in the OPENems Controller.
+    All Slots will be configured threw Attributes
+    
   </li>
   <br>
 
-  <a name="OPENwebget"></a>
+  <a name="OPENemsget"></a>
   <b>Get</b> <ul>N/A</ul><br>
 
-  <a name="OPENwebattr"></a>
+  <a name="OPENemsattr"></a>
   <b>Attributes</b>
   <ul>    
     <li><a name="readingList">readingList</a><br>
