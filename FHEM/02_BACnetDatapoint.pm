@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_BACnetDatapoint.pm 10883 2021-08-10 12:37:36Z sschulze $
+# $Id: 02_BACnetDatapoint.pm 11071 2021-09-13 11:47:24Z sschulze $
 # History
+# 2021-09-13 Datapoint define now possible with missing BACnet Device
 # 2021-08-10 Add prop_presentValue setter as default
 # 2020-12-02 CLI Commandos Encoding Problem behoben
 package main;
@@ -210,7 +211,7 @@ BACnetDatapoint_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
-  $hash->{VERSION} = "2021-08-10_12:37:36";
+  $hash->{VERSION} = "2021-09-13_11:47:24";
 
   my $name = shift @a;
   my $type = shift @a;
@@ -230,9 +231,15 @@ BACnetDatapoint_Define($$)
 
   my $dev_hash = $defs{$deviceName};
 
-  return "Unknown BACnetDevice $deviceName. Please define BACnetDevice" until($dev_hash);
+  #return "Unknown BACnetDevice $deviceName. Please define BACnetDevice" until($dev_hash);
 
-  $hash->{IODev} = $deviceName;
+  if($dev_hash) {
+    $hash->{IODev} = $deviceName;
+  }
+  else {
+    $hash->{IODev} = "BACnetDevice_not_found";
+  }
+  #$hash->{IODev} = $deviceName;
   $hash->{ObjectId} = $objectId;
   $hash->{IP} = $dev_hash->{IP};
 
