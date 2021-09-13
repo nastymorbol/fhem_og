@@ -138,6 +138,17 @@ writeUpdateFile(@) {
 
     print "UPD ".$filetime." ".$filesize." ".$destination.basename($filename)."\n";
     print $fh "UPD ".$filetime." ".$filesize." ".$destination.basename($filename)."\n";
+
+    if($filename =~ /01_BACnetDevice/)
+    {
+      print "MOV FHEM/00_BACnetDevice.pm unused"."\n";
+      print $fh "MOV FHEM/00_BACnetDevice.pm unused"."\n";
+    }
+    elsif($filename =~ /02_BACnetDatapoint/)
+    {
+      print "MOV FHEM/00_BACnetDatapoint.pm unused"."\n";
+      print $fh "MOV FHEM/00_BACnetDatapoint.pm unused"."\n";
+    }
   }
 }
 

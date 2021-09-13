@@ -1,4 +1,7 @@
 OPENgate last changes:
+2021-09-13
+ - Renamed BACnetDatapoint and BACnetDevice Module
+
 2021-09-11
  - OPENems          Initital commit
 
