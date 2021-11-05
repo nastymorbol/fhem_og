@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20670 2021-08-30 13:46:11Z sschulze $
+# $Id: 00_OPENgate.pm 21062 2021-11-05 12:42:05Z sschulze $
 # History
+# 2021-11-05 Implemented FallBack MQTT Driver if C# Client doesnt appear within 360 sec
 # 2021-08-30 Problem while updateing MQTT Parameter
 # 2021-06-14 Bug in Gateway Parameter setter
 # 2021-05-20 Support for URN set
@@ -21,7 +22,7 @@ OPENgate_Initialize($)
 
   $hash->{SetFn}     = "OPENgate_Set";
   $hash->{DefFn}     = "OPENgate_Define";
-#  $hash->{NotifyFn}  = "OPENgate_Notify";
+  $hash->{NotifyFn}  = "OPENgate_Notify";
   no warnings 'qw';
   my @attrList = qw(
     disable
@@ -174,13 +175,16 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-08-30_13:46:11";
+  $hash->{VERSION} = "2021-11-05_12:42:05";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)
   {
     $hash->{urn} = $urn;
   }
+
+  InternalTimer(gettimeofday() + 10, "OPENgate_TimerElapsed", $hash);
+
   return undef;
 }
 
@@ -203,23 +207,7 @@ OPENgate_Notify(@) {
     $own_hash->{VersionFrontend} = ReadingsVal("DockerImageInfo", "image.version", undef);
     $own_hash->{SshPublicKey} = ReadingsVal("DockerImageInfo", "ssh-id_ed25519.pub", undef);
 	}
-  else
-  {
-    # Fixed Use of uninitialized 2020-09-24
-    if($own_hash->{Logger})
-    {
-      if($own_hash->{Logger} ne "Inactive")
-      {      
-        foreach my $event (@{$events}) {
-          next if(!defined($event));
-          my $time = unixTimeMs();
-          my $payload = "$time $devName $event";
-          postMqttPayload("/data/log", $payload);
-        }
-      }
-    }
-  }
-
+  
   return undef;
 }
 
@@ -244,7 +232,7 @@ OPENgate_TimerElapsed($)
   }
   else
   {
-      InternalTimer(gettimeofday() + 60, "OPENgate_TimerElapsed", $hash);
+    InternalTimer(gettimeofday() + 10, "OPENgate_TimerElapsed", $hash);
   }
 }
 
@@ -253,8 +241,25 @@ OPENgate_InitMqtt($)
 {
   my ($hash) = @_;
   
+  my $name = $hash->{NAME};
   $hash->{MqttClientState} = "Init Start";
-  readingsSingleUpdate($hash, "state", "Init", 1);
+  #readingsSingleUpdate($hash, "state", "Init", 1);
+
+  $hash->{TST_DEMO} = "Timer Elapsed: " . gmtime(gettimeofday());
+  my $mqttDriverAge = ReadingsAge($hash->{NAME}, 'MQTTDriverState', -1);
+  $hash->{MQTTDriverStateAge} = "ReadingsAge:   " . $mqttDriverAge;  
+
+  # C# Driver Updates every 300sec the State ...
+  my $activateInternalMqttDriver = ($mqttDriverAge == -1) || ($mqttDriverAge > 360);
+  
+  if($activateInternalMqttDriver)
+  {
+    $hash->{INTERNAL_MQTT_DRIVER} = "active";
+  }
+  else  
+  {
+    $hash->{INTERNAL_MQTT_DRIVER} = "inactive";
+  }
 
   my $gatewayId = getKeyValue($hash->{NAME} . "_gatewayId");
   my $username = getKeyValue($hash->{NAME} . "_username");
@@ -269,8 +274,8 @@ OPENgate_InitMqtt($)
   readingsBulkUpdateIfChanged($hash, "gatewayId", $gatewayId);
   readingsEndUpdate($hash, 1);
   
-  readingsSingleUpdate($hash, "state", "Init done", 1);
-  $hash->{MqttClientState} = "Init done";
+  #readingsSingleUpdate($hash, "state", "Init done", 1);
+  $hash->{MqttClientState} = "OK";
   #return undef;
   #my $gatewayId = AttrVal("MqttClient", "clientId", undef);
 
@@ -281,9 +286,6 @@ OPENgate_InitMqtt($)
     if( not defined ($mqttClient))
     {
       readingsSingleUpdate($hash, "state", "Error MqttClient not found!", 1);
-#      fhem("defmod MqttClient MQTT2_CLIENT rmt01.deos-ag.com:8883");
-      fhem("attr MqttClient autocreate no");
-      fhem("attr MqttClient room MQTT,System");      
     }
 
     $mqttClient = $defs{MqttClient};
@@ -317,13 +319,19 @@ OPENgate_InitMqtt($)
           fhem("attr MqttClient username $value") if AttrVal("MqttClient", "username", "0") ne "$value";
 
           fhem("set MqttClient password $password");
-#          fhem("modify MqttClient rmt01.deos-ag.com:8883");
           fhem("save") if $init_done;
         }
         readingsBeginUpdate($hash);
         readingsBulkUpdateIfChanged($hash, "state", "OK");
         readingsEndUpdate($hash, 1);
+
+        if($activateInternalMqttDriver)
+        {
+          fhem("attr $mqttClient->{NAME} disable 0");
+          fhem("set $mqttClient->{NAME} connect");
+        }
       }
+
       readingsBeginUpdate($hash);
       readingsBulkUpdateIfChanged($hash, "username", $username);
       readingsBulkUpdateIfChanged($hash, "gatewayId", $gatewayId);
@@ -349,6 +357,11 @@ OPENgate_InitMqtt($)
   	    fhem("attr MqttCli readingList gateway/$gatewayId/command/req.* { mqttCliCommand(\$TOPIC, \$NAME, \$DEVICETOPIC, \$EVENT) }");
         fhem("save") if $init_done;
         readingsSingleUpdate($hash, "state", "OK", 1);
+      }
+
+      if($activateInternalMqttDriver && (AttrVal($mqttCli->{NAME}, "disable", "1") ne "0" ))
+      {
+        fhem("attr $mqttCli->{NAME} disable 0");
       }
     }
     else

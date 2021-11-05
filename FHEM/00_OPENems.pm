@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENems.pm 6305 2021-09-11 10:53:35Z sschulze $
+# $Id: 00_OPENems.pm 6922 2021-10-06 11:34:27Z sschulze $
 # History
 # 2021-09-11 Initital commit
 
@@ -56,7 +56,7 @@ OPENems_Set($@)
   my @setList = ();
   
   if($cmd eq "ScanTrendSlots")
-	{    
+  {    
     $hash->{DriverReq} = "CMD:ScanTrendSlots";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return undef;
@@ -117,13 +117,32 @@ OPENems_Set($@)
     return undef;
   }
 
-  if(not defined AttrVal($name,"autocreateDevices",undef) ) {
-    # push @setList, "autocreateDevices";
-  }
-    
-  return join ' ', @setList;
 
-  return undef;
+  if($cmd eq "AddLabelByName")
+  {    
+    my $labelName = shift @a;
+    if(!defined $labelName || $labelName eq '')
+    {
+        return "Error: Label name must have an value like 'zeit.f:E06'"
+    }
+    
+    my ($fupPage, $label) = split(':', $labelName);
+    if(!defined $fupPage || $fupPage eq '')
+    {
+        return "Error: Label name must have an value like 'zeit.f:E06'. FupPage part is not set"
+    }
+    if(!defined $label || $label eq '')
+    {
+        return "Error: Label name must have an value like 'zeit.f:E06'. Label part is not set"
+    }
+    
+    $hash->{DriverReq} = "CMD:AddLabelByName " . $labelName;
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    return undef;
+  }
+  
+  push @setList, "AddLabelByName";   
+  return join ' ', @setList;
 }
 
 sub OPENems_Attr($$$$)
@@ -156,7 +175,7 @@ OPENems_Define($$)
 
   return "Wrong syntax: use define <name> OPENems http[s]://ip[:port]" if(int(@a) != 2);
 
-  $hash->{VERSION} = "2021-09-11_10:53:35";
+  $hash->{VERSION} = "2021-10-06_11:34:27";
 
   if(AttrVal($name,"room", undef)) {
     
