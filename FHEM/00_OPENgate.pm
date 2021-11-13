@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20981 2021-11-13 12:31:24Z sschulze $
+# $Id: 00_OPENgate.pm 21029 2021-11-13 12:32:26Z sschulze $
 # History
 # 2021-11-13 MqttClient cyclic parameter update
 # 2021-11-05 Implemented FallBack MQTT Driver if C# Client doesnt appear within 360 sec
@@ -176,7 +176,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-11-13_12:31:24";
+  $hash->{VERSION} = "2021-11-13_12:32:26";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)
