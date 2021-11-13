@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 21062 2021-11-05 12:42:05Z sschulze $
+# $Id: 00_OPENgate.pm 20981 2021-11-13 12:31:24Z sschulze $
 # History
+# 2021-11-13 MqttClient cyclic parameter update
 # 2021-11-05 Implemented FallBack MQTT Driver if C# Client doesnt appear within 360 sec
 # 2021-08-30 Problem while updateing MQTT Parameter
 # 2021-06-14 Bug in Gateway Parameter setter
@@ -175,7 +176,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-11-05_12:42:05";
+  $hash->{VERSION} = "2021-11-13_12:31:24";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)
@@ -295,32 +296,31 @@ OPENgate_InitMqtt($)
       if($mstate ne "opened")
       {
         my $clientId = ReadingsVal($mqttClient->{NAME}, "clientId", undef);
-        if(not defined($clientId))
-        {
-          my $value = "gateway/$gatewayId/command/req/#";
-          fhem("attr MqttClient subscriptions $value") if AttrVal("MqttClient", "subscriptions", "0") ne $value;
-          
-          $value = "gateway/$gatewayId/metric OFFLINE";
-          fhem("attr MqttClient lwt $value") if AttrVal("MqttClient", "lwt", "0") ne $value;
 
-          $value = "-r gateway/$gatewayId/metric ONLINE";
-          fhem("attr MqttClient msgAfterConnect $value") if AttrVal("MqttClient", "msgAfterConnect", "0") ne $value;
+        my $value = "gateway/$gatewayId/command/req/#";
+        fhem("attr MqttClient subscriptions $value") if AttrVal("MqttClient", "subscriptions", "0") ne $value;
+        
+        $value = "gateway/$gatewayId/metric OFFLINE";
+        fhem("attr MqttClient lwt $value") if AttrVal("MqttClient", "lwt", "0") ne $value;
 
-          $value = "-r gateway/$gatewayId/metric GO OFFLINE";
-          fhem("attr MqttClient msgBeforeDisconnect $value") if AttrVal("MqttClient", "msgBeforeDisconnect", "0") ne $value;
-          
-          $value = $gatewayId;
-          fhem("attr MqttClient clientId $value") if AttrVal("MqttClient", "clientId", "0") ne $value;
+        $value = "-r gateway/$gatewayId/metric ONLINE";
+        fhem("attr MqttClient msgAfterConnect $value") if AttrVal("MqttClient", "msgAfterConnect", "0") ne $value;
 
-          $value = "1";
-          fhem("attr MqttClient SSL $value") if AttrVal("MqttClient", "SSL", "0") ne $value;
+        $value = "-r gateway/$gatewayId/metric GO OFFLINE";
+        fhem("attr MqttClient msgBeforeDisconnect $value") if AttrVal("MqttClient", "msgBeforeDisconnect", "0") ne $value;
+        
+        $value = $gatewayId;
+        fhem("attr MqttClient clientId $value") if AttrVal("MqttClient", "clientId", "0") ne $value;
 
-          $value = $username;
-          fhem("attr MqttClient username $value") if AttrVal("MqttClient", "username", "0") ne "$value";
+        $value = "1";
+        fhem("attr MqttClient SSL $value") if AttrVal("MqttClient", "SSL", "0") ne $value;
 
-          fhem("set MqttClient password $password");
-          fhem("save") if $init_done;
-        }
+        $value = $username;
+        fhem("attr MqttClient username $value") if AttrVal("MqttClient", "username", "0") ne "$value";
+
+        fhem("set MqttClient password $password");
+        fhem("save") if $init_done;
+        
         readingsBeginUpdate($hash);
         readingsBulkUpdateIfChanged($hash, "state", "OK");
         readingsEndUpdate($hash, 1);
