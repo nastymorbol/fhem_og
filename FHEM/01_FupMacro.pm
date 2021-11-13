@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 01_FupMacro.pm 5902 2021-11-05 20:11:50Z sschulze $
+# $Id: 01_FupMacro.pm 6443 2021-11-05 20:40:00Z sschulze $
 # History
 # 2021-11-05 Initital commit
 
@@ -161,7 +161,7 @@ FupMacro_Define($$)
 
   return "Wrong syntax: use define <name> FupMacro <OPENems>" if(int(@a) != 2);
 
-  $hash->{VERSION} = "2021-11-05_20:11:50";
+  $hash->{VERSION} = "2021-11-05_20:40:00";
 
   my $type = shift @a;
   my $iodev = shift @a;
