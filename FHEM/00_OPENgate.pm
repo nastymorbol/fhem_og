@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 21029 2021-11-13 12:32:26Z sschulze $
+# $Id: 00_OPENgate.pm 21203 2021-11-13 16:07:05Z sschulze $
 # History
+# 2021-11-13 FallBack MQTT Driver if C# Client disconnected
 # 2021-11-13 MqttClient cyclic parameter update
 # 2021-11-05 Implemented FallBack MQTT Driver if C# Client doesnt appear within 360 sec
 # 2021-08-30 Problem while updateing MQTT Parameter
@@ -176,7 +177,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-11-13_12:32:26";
+  $hash->{VERSION} = "2021-11-13_16:07:05";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)
@@ -248,10 +249,12 @@ OPENgate_InitMqtt($)
 
   $hash->{TST_DEMO} = "Timer Elapsed: " . gmtime(gettimeofday());
   my $mqttDriverAge = ReadingsAge($hash->{NAME}, 'MQTTDriverState', -1);
+  my $mqttDriverState = ReadingsVal($hash->{NAME}, 'MQTTDriverState', -1);
+
   $hash->{MQTTDriverStateAge} = "ReadingsAge:   " . $mqttDriverAge;  
 
   # C# Driver Updates every 300sec the State ...
-  my $activateInternalMqttDriver = ($mqttDriverAge == -1) || ($mqttDriverAge > 360);
+  my $activateInternalMqttDriver = ($mqttDriverAge == -1) || ($mqttDriverAge > 360) || $mqttDriverState =~ /disconnected/;
   
   if($activateInternalMqttDriver)
   {
