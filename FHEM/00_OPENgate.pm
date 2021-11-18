@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 21203 2021-11-13 16:07:05Z sschulze $
+# $Id: 00_OPENgate.pm 19979 2021-11-18 04:26:16Z sschulze $
 # History
 # 2021-11-13 FallBack MQTT Driver if C# Client disconnected
 # 2021-11-13 MqttClient cyclic parameter update
@@ -132,6 +132,10 @@ OPENgate_Set($@)
     my $keyName = $hash->{NAME} . "_" . $prop;
     setKeyValue($keyName, $value);
     
+    undef $hash->{helper}{GATEWAY_ID};
+    undef $hash->{helper}{GATEWAY_USER_NAME};      
+    undef $hash->{helper}{GATEWAY_PASSWORD};
+    
     return OPENgate_InitMqtt($hash);
   }
 
@@ -139,21 +143,6 @@ OPENgate_Set($@)
   {
     return "Log driver not supported";
 
-    if($value eq "active")
-    {
-      notifyRegexpChanged($hash, ".*");
-      #$hash->{NOTIFYDEV} = ".*";
-      $hash->{Logger} = "Start: ". gettimeofday();
-      OPENgate_TimerElapsed($hash);
-    }
-    else
-    {
-      notifyRegexpChanged($hash, "global");
-      #$hash->{NOTIFYDEV} = "global";
-      $hash->{Logger} = "inactive";
-      OPENgate_TimerElapsed($hash);
-    }
-    return undef;
   }
 
   if($prop eq "BACnetDriverVersion")
@@ -177,7 +166,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-11-13_16:07:05";
+  $hash->{VERSION} = "2021-11-18_04:26:16";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)
@@ -204,10 +193,10 @@ OPENgate_Notify(@) {
 
 	if($devName eq "global" && grep(m/^INITIALIZED|REREADCFG$/, @{$events}))
 	{
-    $own_hash->{MqttClientState} = "Init";
-    InternalTimer(gettimeofday() + 5, "OPENgate_TimerElapsed", $own_hash);
-    $own_hash->{VersionFrontend} = ReadingsVal("DockerImageInfo", "image.version", undef);
-    $own_hash->{SshPublicKey} = ReadingsVal("DockerImageInfo", "ssh-id_ed25519.pub", undef);
+        $own_hash->{MqttClientState} = "Init";
+        InternalTimer(gettimeofday() + 5, "OPENgate_TimerElapsed", $own_hash);
+        $own_hash->{VersionFrontend} = ReadingsVal("DockerImageInfo", "image.version", undef);
+        $own_hash->{SshPublicKey} = ReadingsVal("DockerImageInfo", "ssh-id_ed25519.pub", undef);
 	}
   
   return undef;
@@ -222,20 +211,7 @@ OPENgate_TimerElapsed($)
 
   OPENgate_InitMqtt($hash);
   
-  if($hash->{Logger} && $hash->{Logger} =~ /Start: /)
-  {
-    InternalTimer(gettimeofday() + 10, "OPENgate_TimerElapsed", $hash);
-    my $logTimer = gettimeofday() - int($hash->{Logger} =~ s/Start: (.*)/$1/r);
-    if($logTimer > 60)
-    {
-      $hash->{Logger} = "Inactive";
-      $hash->{NOTIFYDEV} = "global";
-    }
-  }
-  else
-  {
-    InternalTimer(gettimeofday() + 10, "OPENgate_TimerElapsed", $hash);
-  }
+  InternalTimer(gettimeofday() + 10, "OPENgate_TimerElapsed", $hash);  
 }
 
 sub
@@ -264,10 +240,24 @@ OPENgate_InitMqtt($)
   {
     $hash->{INTERNAL_MQTT_DRIVER} = "inactive";
   }
+  
+  # Check cached connection params
+  if(not defined $hash->{helper}{GATEWAY_ID})
+  {
+      $hash->{helper}{GATEWAY_ID} = getKeyValue($name . "_gatewayId");
+  }
+  if(not defined $hash->{helper}{GATEWAY_USER_NAME})
+  {
+      $hash->{helper}{GATEWAY_USER_NAME} = getKeyValue($name . "_username");      
+  }
+  if(not defined $hash->{helper}{GATEWAY_PASSWORD})
+  {
+      $hash->{helper}{GATEWAY_PASSWORD} = getKeyValue($name . "_password");
+  }
 
-  my $gatewayId = getKeyValue($hash->{NAME} . "_gatewayId");
-  my $username = getKeyValue($hash->{NAME} . "_username");
-  my $password = getKeyValue($hash->{NAME} . "_password");
+  my $gatewayId = $hash->{helper}{GATEWAY_ID};
+  my $username = $hash->{helper}{GATEWAY_USER_NAME};
+  my $password = $hash->{helper}{GATEWAY_PASSWORD};
 
   $hash->{gatewayId} = $gatewayId ? "OK" : "ERROR";
   $hash->{username} = $username ? "OK" : "ERROR";
@@ -277,81 +267,83 @@ OPENgate_InitMqtt($)
   readingsBulkUpdateIfChanged($hash, "username", $username);
   readingsBulkUpdateIfChanged($hash, "gatewayId", $gatewayId);
   readingsEndUpdate($hash, 1);
-  
-  #readingsSingleUpdate($hash, "state", "Init done", 1);
   $hash->{MqttClientState} = "OK";
-  #return undef;
-  #my $gatewayId = AttrVal("MqttClient", "clientId", undef);
 
   if($gatewayId && $username && $password)
   {
     #return $gatewayId . " : " . $username . " : " . $password;
     my $mqttClient = $defs{MqttClient};
-    if( not defined ($mqttClient))
+    if(not defined ($mqttClient))
     {
       readingsSingleUpdate($hash, "state", "Error MqttClient not found!", 1);
+      return undef;
     }
-
-    $mqttClient = $defs{MqttClient};
-    if($mqttClient)
+    
+    if($activateInternalMqttDriver)
     {
-      my $mstate = ReadingsVal($mqttClient->{NAME}, "state", "0");
-      if($mstate ne "opened")
-      {
-        my $clientId = ReadingsVal($mqttClient->{NAME}, "clientId", undef);
-
-        my $value = "gateway/$gatewayId/command/req/#";
-        fhem("attr MqttClient subscriptions $value") if AttrVal("MqttClient", "subscriptions", "0") ne $value;
-        
-        $value = "gateway/$gatewayId/metric OFFLINE";
-        fhem("attr MqttClient lwt $value") if AttrVal("MqttClient", "lwt", "0") ne $value;
-
-        $value = "-r gateway/$gatewayId/metric ONLINE";
-        fhem("attr MqttClient msgAfterConnect $value") if AttrVal("MqttClient", "msgAfterConnect", "0") ne $value;
-
-        $value = "-r gateway/$gatewayId/metric GO OFFLINE";
-        fhem("attr MqttClient msgBeforeDisconnect $value") if AttrVal("MqttClient", "msgBeforeDisconnect", "0") ne $value;
-        
-        $value = $gatewayId;
-        fhem("attr MqttClient clientId $value") if AttrVal("MqttClient", "clientId", "0") ne $value;
-
-        $value = "1";
-        fhem("attr MqttClient SSL $value") if AttrVal("MqttClient", "SSL", "0") ne $value;
-
-        $value = $username;
-        fhem("attr MqttClient username $value") if AttrVal("MqttClient", "username", "0") ne "$value";
-
-        fhem("set MqttClient password $password");
-        fhem("save") if $init_done;
-        
-        readingsBeginUpdate($hash);
-        readingsBulkUpdateIfChanged($hash, "state", "OK");
-        readingsEndUpdate($hash, 1);
-
-        if($activateInternalMqttDriver)
+        if(IsDisabled($mqttClient->{NAME}))
         {
-          fhem("attr $mqttClient->{NAME} disable 0");
-          fhem("set $mqttClient->{NAME} connect");
-        }
-      }
-
-      readingsBeginUpdate($hash);
-      readingsBulkUpdateIfChanged($hash, "username", $username);
-      readingsBulkUpdateIfChanged($hash, "gatewayId", $gatewayId);
-      readingsEndUpdate($hash, 1);
+            fhem("attr $mqttClient->{NAME} disable 0");
+        }        
     }
+   
+    if(not IsDisabled($mqttClient->{NAME}))
+    {  
+        my $mstate = ReadingsVal($mqttClient->{NAME}, "state", "0");
+        if($mstate ne "opened" && !IsDisabled($mqttClient->{NAME}))
+        {
+            my $clientId = ReadingsVal($mqttClient->{NAME}, "clientId", undef);
+            
+            my $value = "gateway/$gatewayId/command/req/#";
+            fhem("attr MqttClient subscriptions $value") if AttrVal("MqttClient", "subscriptions", "0") ne $value;
+            
+            $value = "gateway/$gatewayId/metric PERL OFFLINE";
+            fhem("attr MqttClient lwt $value") if AttrVal("MqttClient", "lwt", "0") ne $value;
+            
+            $value = "-r gateway/$gatewayId/metric PERL ONLINE";
+            fhem("attr MqttClient msgAfterConnect $value") if AttrVal("MqttClient", "msgAfterConnect", "0") ne $value;
+            
+            $value = "-r gateway/$gatewayId/metric PERL GO OFFLINE";
+            fhem("attr MqttClient msgBeforeDisconnect $value") if AttrVal("MqttClient", "msgBeforeDisconnect", "0") ne $value;
+            
+            $value = "perl_" . $gatewayId;
+            fhem("attr MqttClient clientId $value") if AttrVal("MqttClient", "clientId", "0") ne $value;
+            
+            $value = "1";
+            fhem("attr MqttClient SSL $value") if AttrVal("MqttClient", "SSL", "0") ne $value;
+            
+            $value = $username;
+            fhem("attr MqttClient username $value") if AttrVal("MqttClient", "username", "0") ne "$value";
+            
+            fhem("set MqttClient password $password");
+            fhem("save") if $init_done;
+            
+            readingsBeginUpdate($hash);
+            readingsBulkUpdateIfChanged($hash, "state", "OK");
+            readingsEndUpdate($hash, 1);
+            
+            fhem("set $mqttClient->{NAME} connect");
+        }
+    }
+    
+    readingsBeginUpdate($hash);
+    readingsBulkUpdateIfChanged($hash, "username", $username);
+    readingsBulkUpdateIfChanged($hash, "gatewayId", $gatewayId);
+    readingsEndUpdate($hash, 1);
+    
 
     my $mqttCli = $defs{MqttCli};
-    if( not defined( $mqttCli ))
+    if(not defined( $mqttCli ))
     {
       readingsSingleUpdate($hash, "state", "Error MqttCli not found!", 1);
       fhem("defmod MqttCli MQTT2_DEVICE MqttClient");
       fhem("attr MqttCli IODev MqttClient");
-      fhem("attr MqttCli room MQTT,System");      
+      fhem("attr MqttCli room MQTT,System");     
+      $mqttCli = $defs{MqttCli}; 
     }
 
-    $mqttCli = $defs{MqttCli};
-    if($mqttCli)
+    
+    if(defined $mqttCli)
     {
       # Fixed Use of uninitialized 2020-09-24
       my $attrVal = AttrVal("MqttCli", "readingList", "0");      
@@ -362,7 +354,7 @@ OPENgate_InitMqtt($)
         readingsSingleUpdate($hash, "state", "OK", 1);
       }
 
-      if($activateInternalMqttDriver && (AttrVal($mqttCli->{NAME}, "disable", "1") ne "0" ))
+      if($activateInternalMqttDriver && IsDisabled($mqttCli->{NAME}))
       {
         fhem("attr $mqttCli->{NAME} disable 0");
       }
@@ -379,38 +371,7 @@ OPENgate_InitMqtt($)
     return $gatewayId . " : " . $username . " : " . $password;
     #return undef;
   }
-  else
-  {
-    #my $mqttClient = $defs{MqttClient};
-    #if($mqttClient)
-    #{
-    #  $gatewayId = AttrVal($mqttClient->{NAME}, "clientId", undef);
-    #  if($gatewayId)
-    #  {
-    #    Log3($hash->{NAME}, 1, "OPENgate nicht konfiguriert - Versuche gatewayId MQTT zu ermitteln");
-    #    setKeyValue($hash->{NAME} . "_gatewayId", $gatewayId);        
-    #  }
-    #  
-    #  $username = AttrVal($mqttClient->{NAME}, "username", undef);
-    #  if($username)
-    #  {
-    #    Log3($hash->{NAME}, 1, "OPENgate nicht konfiguriert - Versuche username MQTT zu ermitteln");
-    #    setKeyValue($hash->{NAME} . "_username", $username);        
-    #  }
-    #  
-    #  $password = getKeyValue($mqttClient->{NAME});
-    #  if($password)
-    #  {
-    #    Log3($hash->{NAME}, 1, "OPENgate nicht konfiguriert - Versuche password MQTT zu ermitteln");
-    #    setKeyValue($hash->{NAME} . "_password", $password);        
-    #  }
-    #}
-  }
-
-	#fhem("attr MqttClient subscriptions gateway/$gatewayId/command/req/#") if($gatewayId);
-	#fhem("attr MqttClient lwt gateway/$gatewayId/metric OFFLINE") if($gatewayId);
-	#fhem("attr MqttCli readingList gateway/$gatewayId/command/req.* { mqttCliCommand(\$TOPIC, \$NAME, \$DEVICETOPIC, \$EVENT) }") if($gatewayId);
-
+  
   readingsSingleUpdate($hash, "state", "Error", 1);
 
   return "Error - GatewayId not set" if(not defined($gatewayId));
