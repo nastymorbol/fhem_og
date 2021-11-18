@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 21682 2021-11-18 05:28:47Z sschulze $
+# $Id: 00_OPENgate.pm 20073 2021-11-18 05:51:21Z sschulze $
 # History
 # 2021-11-13 FallBack MQTT Driver if C# Client disconnected
 # 2021-11-13 MqttClient cyclic parameter update
@@ -166,7 +166,7 @@ OPENgate_Define($$)
 
   $hash->{NOTIFYDEV} = "global";
 
-  $hash->{VERSION} = "2021-11-18_05:28:47";
+  $hash->{VERSION} = "2021-11-18_05:51:21";
 
   my $urn = getKeyValue($hash->{NAME} . "_urn");
   if($urn)
@@ -628,92 +628,6 @@ getClientId()
 }
 
 # ------------ END MQTT HELPER ---------------
-
-my $E0 = 0.6112; # saturation pressure at T=0 ∞C
-my @ab_gt0 = (17.62, 243.12);    # T>0
-my @ab_le0 = (22.46, 272.6);     # T<=0 over ice
-
-### ** Public interface ** keep stable
-# vapour pressure in kPa
-sub myutils_vp($$)
-{
-	my ($T, $Hr) = @_;
-	my ($a, $b);
-	
-	if ($T > 0) {
-		($a, $b) = @ab_gt0;
-	} else {
-		($a, $b) = @ab_le0;
-	}
-	
-	return 0.01 * $Hr * $E0 * exp($a * $T / ($T + $b));
-}
-
-### ** Public interface ** keep stable
-# dewpoint in ∞C
-sub
-myutils_dewpoint($$)
-{
-	my ($T, $Hr) = @_;
-	if ($Hr == 0) {
-		Log(1, "Error: dewpoint() Hr==0 !: temp=$T, hum=$Hr");
-		return undef;
-	}
-	
-	my ($a, $b);
-	
-	if ($T > 0) {
-		($a, $b) = @ab_gt0;
-	} else {
-		($a, $b) = @ab_le0;
-	}
-	
-	# solve vp($dp, 100) = vp($T,$Hr) for $dp 
-	my $v = log(myutils_vp($T, $Hr) / $E0);
-	my $D = $a - $v;
-	
-	# can this ever happen for valid input?
-	if ($D == 0) {
-		Log(1, "Error: dewpoint() D==0 !: temp=$T, hum=$Hr");
-		return undef;
-	}
-	
-	return round($b * $v / $D, 1);
-}
-
-
-### ** Public interface ** keep stable
-# absolute Feuchte in g Wasserdampf pro m3 Luft
-sub
-myutils_absFeuchte ($$)
-{
-	my ($T, $Hr) = @_;
-	
-	# 110 ?
-	if (($Hr < 0) || ($Hr > 110)) {
-		Log(1, "Error dewpoint: humidity invalid: $Hr");
-		return "";
-	}
-	my $DD = myutils_vp($T, $Hr);
-	my $AF  = 1.0E6 * (18.016 / 8314.3) * ($DD / (273.15 + $T));
-	return round($AF, 1);
-}
-
-### Humidity correction
-sub
-myutils_calchumidity($$$)
-{
-	my ($temp, $humi, $temp2) = @_;
-	
-	# -> 8 g/kG
-	my $abs1    = myutils_absFeuchte($temp, $humi);
-	
-	# -> 17 g/kG
-	my $maxAbs2 = myutils_absFeuchte($temp2, 100);
-	my $humi2 = $abs1 / $maxAbs2 * 100.0;
-	
-	return round($humi2,1);
-}
 
 1;
 
