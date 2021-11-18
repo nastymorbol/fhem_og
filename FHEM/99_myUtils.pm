@@ -1,9 +1,10 @@
 ##############################################
-# $Id: 99_myUtils.pm 3287 2021-04-12 17:18:58Z sschulze $
+# $Id: 99_myUtils.pm 3345 2021-11-18 05:31:16Z sschulze $
 #
 # Save this file as 99_myUtils.pm, and create your own functions in the new
 # file. They are then available in every Perl expression.
 # History
+# 2021-04-04 ClientId from OPENgate (not from MqttClient)
 # 2021-04-04 Korrekturformel für Temp/Humidity eingepflegt
 # 2020-06-16 CLI Commandos Encoding Problem behoben
 # 2020-06-18 DoTrigger für set Befehle eingeplegt um instantan Events abzuarbeiten
