@@ -1,4 +1,6 @@
 OPENgate last changes:
+2021-11-19
+ - FupMacro device added
 2021-11-18
  - OPENgate MqttClient check optimized
  - ClientId from OPENgate (not from MqttClient)
