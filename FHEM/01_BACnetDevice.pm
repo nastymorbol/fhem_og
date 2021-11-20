@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_BACnetDevice.pm 14261 2021-06-02 12:02:53Z sschulze $
+# $Id: 01_BACnetDevice.pm 14302 2021-11-20 00:53:06Z sschulze $
 # History
 # 2020-12-02 encoding attribute hinzugefügt
 # 2021-03-10 DriverRes wird nicht mehr getriggert
@@ -32,8 +32,13 @@ BACnetDevice_Get($$$)
 {
   my ( $hash, $name, $opt, @args ) = @_;
 
-	return "\"get $name\" needs at least one argument" unless(defined($opt));
-
+  return "\"get $name\" needs at least one argument" unless(defined($opt));
+  
+  if($opt eq "urn")
+  {
+    return OPENgate_UpdateInternalUrn($hash, @args);
+  }
+  
   # CMD: Get Notification Classes
   if($opt eq "NotificationClasses")
   {    
@@ -262,7 +267,7 @@ BACnetDevice_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
 
-  $hash->{VERSION} = "2021-06-02_12:02:53";
+  $hash->{VERSION} = "2021-11-20_00:53:06";
 
   my $name = shift @a;
   my $type = shift @a;
@@ -288,12 +293,8 @@ BACnetDevice_Define($$)
   $hash->{DriverRes} = "N/A";
 
   $hash->{RouterIp} = $routerIp if($routerIp);
-  
-  my $urn = getKeyValue($name . "_urn");
-  if($urn)
-  {
-    $hash->{urn} = $urn;
-  }
+
+  OPENgate_InitializeInternalUrn($hash);
 
   if(AttrVal($name,"room",undef)) {
     

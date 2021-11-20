@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENweb.pm 8032 2021-09-09 12:31:37Z sschulze $
+# $Id: 00_OPENweb.pm 8034 2021-11-20 00:52:49Z sschulze $
 # History
 # 2021-05-20 Initital commit
 
@@ -28,10 +28,14 @@ OPENweb_Get($$$)
 {
   my ( $hash, $name, $opt, @args ) = @_;
 
-	return "\"get $name\" needs at least one argument" unless(defined($opt));
+  return "\"get $name\" needs at least one argument" unless(defined($opt));
+    
+  if($opt eq "urn")
+  {
+    return OPENgate_UpdateInternalUrn($hash, @args);
+  }
   
   return undef;
-  
 }
 
 ###################################
@@ -195,7 +199,7 @@ OPENweb_Define($$)
 
   return "Wrong syntax: use define <name> OPENweb http[s]://ip[:port]" if(int(@a) != 2);
 
-  $hash->{VERSION} = "2021-09-09_12:31:37";
+  $hash->{VERSION} = "2021-11-20_00:52:49";
 
   if(AttrVal($name,"room", undef)) {
     
@@ -223,16 +227,11 @@ OPENweb_Define($$)
   
   $hash->{URL} = $url;
   $hash->{IP} = $ip;
-#  $hash->{ObjectId} = "openweb:$ip";
   $hash->{DriverReq} = "N/A";
   $hash->{DriverRes} = "N/A";
   $hash->{STATE} = "Init";
 
-  my $urn = getKeyValue($name . "_urn");
-  if($urn)
-  {
-    $hash->{urn} = $urn;
-  }
+  OPENgate_InitializeInternalUrn($hash);
 
   return undef;
 }

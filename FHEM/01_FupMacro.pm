@@ -1,7 +1,8 @@
 ##############################################
-# $Id: 01_FupMacro.pm 13033 2021-11-19 07:07:16Z sschulze $
+# $Id: 01_FupMacro.pm 14076 2021-11-20 08:57:56Z sschulze $
 # History
 # 2021-11-05 Initital commit
+# 2021-11-20 Changed command structure
 
 package main;
 
@@ -32,6 +33,36 @@ FupMacro_Get($$$)
 
     return "\"get $name\" needs at least one argument" unless(defined($opt));
 
+    my @setList = ();
+
+    if($opt eq "urn")
+    {
+        return OPENgate_UpdateInternalUrn($hash, @args);
+    }
+    
+    if($opt eq 'ClearScanResult')
+    {
+        my @toDelete;
+        my $count = 0;
+        my $readings = $hash->{READINGS};
+        readingsBeginUpdate($hash);
+        foreach my $a ( keys %{$readings} ) {
+            if(index($a, "scan_") == 0 or $a eq "urn")
+            {
+                readingsBulkUpdate($hash, $a, "undef" );
+                push(@toDelete, $a);
+                $count++;
+            }
+        }
+        readingsEndUpdate($hash, 1);
+        
+        foreach(@toDelete){
+            readingsDelete($hash, $_);
+        }
+        
+        return "OK - Removed $count reading(s)";
+    }
+    push @setList, "ClearScanResult:noArg";
     
     if($opt eq 'LabelData')
     {
@@ -57,8 +88,9 @@ FupMacro_Get($$$)
         
         return(to_json(\@labelDatas));
     }
-
-    return "unknown argument choose one of LabelData:noArg";
+    push @setList, "LabelData:noArg";
+    
+    return "unknown argument choose one of " . join(' ', @setList);
 }
 
 ###################################
@@ -74,33 +106,14 @@ sub FupMacro_isNotInt{
 sub
 FupMacro_Set($@)
 {
-  my ($hash, @a) = @_;
-  my $name = shift @a;
-
-  return "no set value specified" if(int(@a) < 1);
-  
-  my $cmd = shift @a;
-  my @setList = ();
-
-    if($cmd =~ /urn/)
-    {
-        my $value = join ' ', @a;
-        if(defined($hash->{urn}))
-        {
-            if($hash->{urn} ne $value)
-            {
-                setKeyValue($name . "_urn", $value);
-                $hash->{urn} = $value;
-            }
-        }
-        else
-        {
-          setKeyValue($name . "_urn", $value);
-          $hash->{urn} = $value;
-        }
-        return "OK";
-    }
+    my ($hash, @a) = @_;
+    my $name = shift @a;
     
+    return "no set value specified" if(int(@a) < 1);
+    
+    my $cmd = shift @a;
+    my @setList = ();
+
     if($cmd =~ /DriverRes/)
     {
         my ($rcmd, $rprop, $rval, $rerr) = @a;
@@ -156,10 +169,12 @@ FupMacro_Set($@)
         my $devHash = $defs{$ioDev};
         $devHash->{DriverReq} = "CMD:$cmd $name";
         DoTrigger($ioDev, "DriverReq: " . $devHash->{DriverReq});
+        $hash->{DriverReq} = "CMD:Delegate $cmd $name to $ioDev";
+        DoTrigger($hash, "DriverReq: " . $hash->{DriverReq});
         return undef;
     }
     push @setList, "ScanLabel:noArg";
-    
+
     if($cmd eq 'RemoveLabel')
     {
         my $value = join '|', @a;
@@ -209,7 +224,7 @@ sub FupMacro_Attr($$$$)
             #$attrValue =~ s/\s+/ /gs;
             if(length($attrValue) < 2)
             {
-                $_[3] = '';
+                $_[3] = '[]';
                 return (undef);
             }
             
@@ -261,7 +276,7 @@ sub FupMacro_Attr($$$$)
                 {
                     if(index(uc $fupPage, "SYSTEM") == -1)
                     {
-                        return "Error label name [$label] is to long."
+                        #return "Error label name [$label] is to long."
                     }
                 }
                 
@@ -300,20 +315,34 @@ FupMacro_Define($$)
     
     return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]" if(int(@a) < 2);
     
-    $hash->{VERSION} = "2021-11-19_07:07:16";
+    $hash->{VERSION} = "2021-11-20_08:57:56";
     
     my $type = shift @a;
     my $iodev = shift @a;
     my $fupPageName = shift @a;
 
-    if(!defined($defs{$iodev}))
+    my $devHash = $defs{$iodev};
+    if(!defined($devHash))
     {
-        return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]. The Device '$iodev' doesn't exist";
+        return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName].\nThe Device '$iodev' doesn't exist";
+    }
+
+    if($devHash->{TYPE} ne "OPENems")
+    {
+        return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName].\nThe Device '$iodev' is not from TYPE OPENems [$devHash->{TYPE}].";
     }
     
     if(not defined($fupPageName) or length($fupPageName) < 3)
     {
-        $fupPageName = +(split('_', $name, 2))[-1];
+        # if name is shorter then the ioDev name, the the fupPage may be the name of this device
+        if(length($name) < length($iodev))
+        {
+            $fupPageName = $name;
+        }
+        else
+        {
+            $fupPageName = (split('_', $name, 2))[-1];   
+        }
     }
 
     if(not goodReadingName($fupPageName))
@@ -326,9 +355,14 @@ FupMacro_Define($$)
     {
         return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]. The FupPageName '$fupPageName' doesn't have an dot f syntax (const.f).";
     }
+    if(lc($fupPageName) eq "system")
+    {
+        $fupPart = "system";
+        $extPart = "-";
+    }
     if(not defined($extPart))
     {
-        return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]. The FupPageName '$fupPageName' doesn't have an dot f syntax (const.f).";
+        return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]. The Extension '$extPart' doesn't have an dot f syntax (const.f).";
     }
     if(length($fupPart) > 8)
     {
@@ -336,7 +370,7 @@ FupMacro_Define($$)
     }
     if(length($extPart) > 2)
     {
-        return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]. The FupPageName '$fupPageName' is to long (max 12 character's)";
+        return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]. The Extension '$extPart' is to long (max 2 character's)";
     }
     if(length($fupPageName) > 11)
     {
@@ -356,15 +390,9 @@ FupMacro_Define($$)
     
     $hash->{DriverReq} = "N/A";
     $hash->{DriverRes} = "N/A";
-    $hash->{STATE} = "Init";
     $hash->{IODev} = $iodev;
-    
-    my $urn = getKeyValue($name . "_urn");
-    if($urn)
-    {
-        $hash->{urn} = $urn;
-    }
-    
+
+    OPENgate_InitializeInternalUrn($hash);
     
     return undef;
 }

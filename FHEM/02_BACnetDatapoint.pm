@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 02_BACnetDatapoint.pm 11071 2021-09-13 11:47:24Z sschulze $
+# $Id: 02_BACnetDatapoint.pm 11109 2021-11-20 00:53:20Z sschulze $
 # History
 # 2021-09-13 Datapoint define now possible with missing BACnet Device
 # 2021-08-10 Add prop_presentValue setter as default
@@ -39,6 +39,11 @@ BACnetDatapoint_Get($$$)
     $hash->{DriverReq} = "CMD:Get$opt";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return undef;
+  }
+
+  if($opt eq "urn")
+  {
+    return OPENgate_UpdateInternalUrn($hash, @args);
   }
 
   return "unknown argument choose one of AllProperties:noArg";
@@ -211,7 +216,7 @@ BACnetDatapoint_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
-  $hash->{VERSION} = "2021-09-13_11:47:24";
+  $hash->{VERSION} = "2021-11-20_00:53:20";
 
   my $name = shift @a;
   my $type = shift @a;
@@ -255,11 +260,7 @@ BACnetDatapoint_Define($$)
   $hash->{DriverReq} = "N/A";
   $hash->{DriverRes} = "N/A";
 
-  my $urn = getKeyValue($name . "_urn");
-  if($urn)
-  {
-    $hash->{urn} = $urn;
-  }
+  OPENgate_InitializeInternalUrn($hash);
 
   if(AttrVal($name,"room",undef)) {
     

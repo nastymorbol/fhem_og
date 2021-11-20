@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_BACnetNetwork.pm 7938 2021-04-12 17:22:33Z sschulze $
+# $Id: 00_BACnetNetwork.pm 7823 2021-11-20 00:51:28Z sschulze $
 # History
 # 2021-04-12 DriverReq wurde immer wieder neu getriggert
 #            Get für ScanNetwork entfernt
@@ -30,19 +30,16 @@ sub
 BACnetNetwork_Get($$$)
 {
   my ( $hash, $name, $opt, @args ) = @_;
-
-	return "\"get $name\" needs at least one argument" unless(defined($opt));
+  
+  return "\"get $name\" needs at least one argument" unless(defined($opt));
+  
+  if($opt eq "urn")
+  {
+    return OPENgate_UpdateInternalUrn($hash, @args);
+  }
   
   return undef;
-  
-  if($opt eq "ScanNetwork")
-	{    
-    $hash->{DriverReq} = "CMD:Get$opt";
-    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    return undef;
-  }
-
-  return "unknown argument choose one of ScanNetwork:noArg";
+  #return "unknown argument choose one of ScanNetwork:noArg";
 
 }
 
@@ -168,7 +165,7 @@ BACnetNetwork_Define($$)
 
   return "Wrong syntax: use define <name> BACnetNetwork DeviceInstance IP[:Port]" if(int(@a) != 3);
 
-  $hash->{VERSION} = "2021-04-12_17:22:33";
+  $hash->{VERSION} = "2021-11-20_00:51:28";
 
   if(AttrVal($name,"room",undef)) {
     
@@ -190,11 +187,7 @@ BACnetNetwork_Define($$)
   $hash->{DriverReq} = "N/A";
   $hash->{DriverRes} = "N/A";
 
-  my $urn = getKeyValue($name . "_urn");
-  if($urn)
-  {
-    $hash->{urn} = $urn;
-  }
+  OPENgate_InitializeInternalUrn($hash);
 
   return undef;
 }

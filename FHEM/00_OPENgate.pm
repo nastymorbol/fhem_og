@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20073 2021-11-18 05:51:21Z sschulze $
+# $Id: 00_OPENgate.pm 20805 2021-11-20 00:56:26Z sschulze $
 # History
 # 2021-11-13 FallBack MQTT Driver if C# Client disconnected
 # 2021-11-13 MqttClient cyclic parameter update
@@ -159,25 +159,62 @@ OPENgate_Set($@)
 sub
 OPENgate_Define($$)
 {
-  my ($hash, $def) = @_;
-  my @a = split("[ \t][ \t]*", $def);
+    my ($hash, $def) = @_;
+    my @a = split("[ \t][ \t]*", $def);
+    
+    return "Wrong syntax: use define <name> OPENgate" if(int(@a) != 2);
+    
+    $hash->{NOTIFYDEV} = "global";
+    
+    $hash->{VERSION} = "2021-11-20_00:56:26";
 
-  return "Wrong syntax: use define <name> OPENgate" if(int(@a) != 2);
-
-  $hash->{NOTIFYDEV} = "global";
-
-  $hash->{VERSION} = "2021-11-18_05:51:21";
-
-  my $urn = getKeyValue($hash->{NAME} . "_urn");
-  if($urn)
-  {
-    $hash->{urn} = $urn;
-  }
-
-  InternalTimer(gettimeofday() + 10, "OPENgate_TimerElapsed", $hash);
-
-  return undef;
+    OPENgate_InitializeInternalUrn($hash);
+    
+    InternalTimer(gettimeofday() + 10, "OPENgate_TimerElapsed", $hash);
+    
+    return undef;
 }
+
+sub 
+OPENgate_InitializeInternalUrn($) 
+{
+    my ($hash) = @_;
+    my $name = $hash->{NAME};
+    my $urn = getKeyValue($name . "_urn");
+    if(defined($urn))
+    {
+        $hash->{urn} = $urn;
+    }
+    else
+    {
+        $hash->{urn} = "N/A";
+    }
+}
+
+sub
+OPENgate_UpdateInternalUrn($@)
+{
+    my ($hash, @args) = @_;
+    my $name = $hash->{NAME};
+    my $value = join ' ', @args;
+    return("OK - " . $hash->{urn}) if length($value) < 2;
+    if(defined($hash->{urn}))
+    {
+        if($hash->{urn} ne $value)
+        {
+            setKeyValue($name . "_urn", $value);
+            $hash->{urn} = $value;
+        }
+    }
+    else
+    {
+        setKeyValue($name . "_urn", $value);
+        $hash->{urn} = $value;
+    }
+    return "OK - $value";
+}
+
+
 
 # Notify actions
 sub 

@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENems.pm 6922 2021-10-06 11:34:27Z sschulze $
+# $Id: 00_OPENems.pm 7280 2021-11-20 05:08:50Z sschulze $
 # History
 # 2021-09-11 Initital commit
 
@@ -27,10 +27,33 @@ sub
 OPENems_Get($$$)
 {
   my ( $hash, $name, $opt, @args ) = @_;
-
-	return "\"get $name\" needs at least one argument" unless(defined($opt));
   
-  return undef;
+  return "\"get $name\" needs at least one argument" unless(defined($opt));
+  
+  if($opt eq "urn")
+  {
+    return OPENgate_UpdateInternalUrn($hash, @args);
+  }
+
+  my @setList = ();
+  
+  if($opt eq "ScanFupPages")
+  {
+    $hash->{DriverReq} = "CMD:ScanFupPages";
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    return "OK";
+  }
+  push @setList, "ScanFupPages:noArg";
+
+  if($opt eq "ScanTrendSlots")
+  {
+    $hash->{DriverReq} = "CMD:ScanTrendSlots";
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    return "OK";
+  }
+  push @setList, "ScanTrendSlots:noArg";
+
+  return "unknown argument choose one of " . join(' ', @setList);
   
 }
 
@@ -54,15 +77,7 @@ OPENems_Set($@)
   
   my $cmd = shift @a;
   my @setList = ();
-  
-  if($cmd eq "ScanTrendSlots")
-  {    
-    $hash->{DriverReq} = "CMD:ScanTrendSlots";
-    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    return undef;
-  }
-  push @setList, "ScanTrendSlots:noArg";
-  
+
   if($cmd =~ /urn/)
   {
     my $value = join ' ', @a;
@@ -95,7 +110,7 @@ OPENems_Set($@)
       if($hash->{DriverReq} ne "done")
       {
         $hash->{DriverReq} = "done" ;
-        DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+        DoTrigger($name, "DriverReq: done");
       }
     }
 
@@ -108,7 +123,7 @@ OPENems_Set($@)
       {
         #$hash->{DriverReq} = $hash->{DriverReq} =~ s/CMD://r;
         $hash->{DriverReq} .= " > exec" ;
-        DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+        # DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
       }
     }
     
@@ -175,7 +190,7 @@ OPENems_Define($$)
 
   return "Wrong syntax: use define <name> OPENems http[s]://ip[:port]" if(int(@a) != 2);
 
-  $hash->{VERSION} = "2021-10-06_11:34:27";
+  $hash->{VERSION} = "2021-11-20_05:08:50";
 
   if(AttrVal($name,"room", undef)) {
     
@@ -188,6 +203,11 @@ OPENems_Define($$)
 
   if (index($url, 'http') == -1) {
     return "Wrong syntax: use define <name> OPENems http[s]://ip[:port]";
+  }
+
+  if(substr($url, -1) eq "/")
+  {
+    $url = substr($url, 0, -1);
   }
   
   my $ipIndex = rindex($url, ':');
@@ -207,11 +227,7 @@ OPENems_Define($$)
   $hash->{DriverRes} = "N/A";
   $hash->{STATE} = "Init";
 
-  my $urn = getKeyValue($name . "_urn");
-  if($urn)
-  {
-    $hash->{urn} = $urn;
-  }
+  OPENgate_InitializeInternalUrn($hash);
 
   return undef;
 }

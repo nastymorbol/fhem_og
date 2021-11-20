@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_DEOSPush.pm 11828 2020-12-02 04:01:40 sschulze $
+# $Id: 00_DEOSPush.pm 11870 2021-11-20 00:42:25Z sschulze $
 package main;
 
 use HttpUtils;
@@ -263,7 +263,7 @@ DEOSPush_Define($$)
 
   return "Wrong syntax: use define <name> DEOSPush" if(int(@a) != 2);
 
-  $hash->{VERSION} = "2020-12-02_04:01:40";
+  $hash->{VERSION} = "2021-11-20_00:42:25";
 
   my $name = $hash->{NAME};
 
@@ -272,6 +272,8 @@ DEOSPush_Define($$)
   } else {
     $attr{$name}{room} = 'BACnet';
   }
+
+  OPENgate_InitializeInternalUrn($hash);
 
   return undef;
 }

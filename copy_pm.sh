@@ -3,8 +3,8 @@
 array=( "01_FupMacro.pm" "00_BACnetNetwork.pm" "01_BACnetDevice.pm" "02_BACnetDatapoint.pm" "00_OPENgate.pm" "00_OPENweb.pm" "00_OPENems.pm" "99_myUtils.pm")
 
 user=deos
-ip=192.168.123.59
-#ip=172.20.47.200
+#ip=192.168.123.59
+ip=172.20.47.200
 #ip=172.20.37.51
 #id="~/.ssh/test_rsa"
 id="~/.ssh/id_rsa"
