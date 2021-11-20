@@ -1,8 +1,9 @@
 ##############################################
-# $Id: 01_FupMacro.pm 14076 2021-11-20 08:57:56Z sschulze $
+# $Id: 01_FupMacro.pm 14541 2021-11-20 17:02:49Z sschulze $
 # History
 # 2021-11-05 Initital commit
 # 2021-11-20 Changed command structure
+# 2021-11-20 New Command read label values
 
 package main;
 
@@ -89,6 +90,18 @@ FupMacro_Get($$$)
         return(to_json(\@labelDatas));
     }
     push @setList, "LabelData:noArg";
+
+    if($opt eq 'LabelValues')
+    {
+        my $ioDev = $hash->{IODev};
+        my $devHash = $defs{$ioDev};
+        $devHash->{DriverReq} = "CMD:$opt $name";
+        DoTrigger($ioDev, "DriverReq: " . $devHash->{DriverReq});
+        $hash->{DriverReq} = "CMD:Delegate $opt $name to $ioDev";
+        DoTrigger($hash, "DriverReq: " . $hash->{DriverReq});
+        return undef;
+    }
+    push @setList, "LabelValues:noArg";
     
     return "unknown argument choose one of " . join(' ', @setList);
 }
@@ -315,7 +328,7 @@ FupMacro_Define($$)
     
     return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]" if(int(@a) < 2);
     
-    $hash->{VERSION} = "2021-11-20_08:57:56";
+    $hash->{VERSION} = "2021-11-20_17:02:49";
     
     my $type = shift @a;
     my $iodev = shift @a;
