@@ -1,9 +1,10 @@
 ##############################################
-# $Id: 01_FupMacro.pm 14541 2021-11-20 17:02:49Z sschulze $
+# $Id: 01_FupMacro.pm 14589 2021-11-22 18:09:07Z sschulze $
 # History
 # 2021-11-05 Initital commit
 # 2021-11-20 Changed command structure
 # 2021-11-20 New Command read label values
+# 2021-11-22 FUP Page Name max Length corrected
 
 package main;
 
@@ -328,7 +329,7 @@ FupMacro_Define($$)
     
     return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]" if(int(@a) < 2);
     
-    $hash->{VERSION} = "2021-11-20_17:02:49";
+    $hash->{VERSION} = "2021-11-22_18:09:07";
     
     my $type = shift @a;
     my $iodev = shift @a;
@@ -385,7 +386,7 @@ FupMacro_Define($$)
     {
         return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]. The Extension '$extPart' is to long (max 2 character's)";
     }
-    if(length($fupPageName) > 11)
+    if(length($fupPageName) > 12)
     {
         return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]. The FupPageName '$fupPageName' is to long (max 12 character's)";
     }

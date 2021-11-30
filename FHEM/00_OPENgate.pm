@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20805 2021-11-20 00:56:26Z sschulze $
+# $Id: 00_OPENgate.pm 20768 2021-11-30 01:58:55Z sschulze $
 # History
 # 2021-11-13 FallBack MQTT Driver if C# Client disconnected
 # 2021-11-13 MqttClient cyclic parameter update
@@ -45,7 +45,6 @@ OPENgate_Set($@)
     gatewayId
     username
     password
-    log:uzsuDropDown,active,inactive
     covMessage
     bacnetDriver
   );
@@ -166,7 +165,7 @@ OPENgate_Define($$)
     
     $hash->{NOTIFYDEV} = "global";
     
-    $hash->{VERSION} = "2021-11-20_00:56:26";
+    $hash->{VERSION} = "2021-11-30_01:58:55";
 
     OPENgate_InitializeInternalUrn($hash);
     
