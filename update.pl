@@ -35,6 +35,7 @@ getFiles($$) {
   for my $filename (@filenames) {
     next if $filename eq ".";
     next if $filename eq "..";
+    next if $filename =~ /.DS_Store/;
 
     next if $filename !~ $regex;
 
