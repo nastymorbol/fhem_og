@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 20768 2021-11-30 01:58:55Z sschulze $
+# $Id: 00_OPENgate.pm 20823 2021-12-04 06:34:17Z sschulze $
 # History
+# 2021-12-04 Metric channel update (now subtopic perl)
 # 2021-11-13 FallBack MQTT Driver if C# Client disconnected
 # 2021-11-13 MqttClient cyclic parameter update
 # 2021-11-05 Implemented FallBack MQTT Driver if C# Client doesnt appear within 360 sec
@@ -165,7 +166,7 @@ OPENgate_Define($$)
     
     $hash->{NOTIFYDEV} = "global";
     
-    $hash->{VERSION} = "2021-11-30_01:58:55";
+    $hash->{VERSION} = "2021-12-04_06:34:17";
 
     OPENgate_InitializeInternalUrn($hash);
     
@@ -333,13 +334,13 @@ OPENgate_InitMqtt($)
             my $value = "gateway/$gatewayId/command/req/#";
             fhem("attr MqttClient subscriptions $value") if AttrVal("MqttClient", "subscriptions", "0") ne $value;
             
-            $value = "gateway/$gatewayId/metric PERL OFFLINE";
+            $value = "gateway/$gatewayId/metric/perl OFFLINE";
             fhem("attr MqttClient lwt $value") if AttrVal("MqttClient", "lwt", "0") ne $value;
             
-            $value = "-r gateway/$gatewayId/metric PERL ONLINE";
+            $value = "-r gateway/$gatewayId/metric/perl ONLINE";
             fhem("attr MqttClient msgAfterConnect $value") if AttrVal("MqttClient", "msgAfterConnect", "0") ne $value;
             
-            $value = "-r gateway/$gatewayId/metric PERL GO OFFLINE";
+            $value = "-r gateway/$gatewayId/metric/perl GO OFFLINE";
             fhem("attr MqttClient msgBeforeDisconnect $value") if AttrVal("MqttClient", "msgBeforeDisconnect", "0") ne $value;
             
             $value = "perl_" . $gatewayId;
