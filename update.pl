@@ -16,7 +16,10 @@ open($filehandle, '>', "update_mods.txt") or die $!;
 writeUpdateFile($filehandle, "FHEM/", @filenames);
 @filenames = getFiles("www/pgm2",);
 writeUpdateFile($filehandle, "www/pgm2/", @filenames);
-
+@filenames = getFiles("www/images",);
+writeUpdateFile($filehandle, "www/images/", @filenames);
+@filenames = getFiles("www/images/default/",);
+writeUpdateFile($filehandle, "www/images/default/", @filenames);
 
 close($filehandle);
 
@@ -38,7 +41,8 @@ getFiles($$) {
     next if $filename =~ /.DS_Store/;
 
     next if $filename !~ $regex;
-
+    next if -d $folder . "/" . $filename;
+    
     push @results, $folder."/".$filename;
   }
 
