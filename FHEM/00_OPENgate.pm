@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 21005 2021-12-15 12:25:30Z sschulze $
+# $Id: 00_OPENgate.pm 22663 2021-12-21 15:05:29Z sschulze $
 # History
+# 2021-12-15 Added command for ssh tunnel over ip
 # 2021-12-15 MqttClient init if Parameter set
 # 2021-12-04 Metric channel update (now subtopic perl)
 # 2021-11-13 FallBack MQTT Driver if C# Client disconnected
@@ -103,7 +104,6 @@ OPENgate_Set($@)
       unshift @a, $timeout;
       $timeout = 10;
     }
-
     my $payload = join(" ", @a);
     return OPENgate_SshCommand($hash, $payload, $timeout, undef);
   }
@@ -119,11 +119,39 @@ OPENgate_Set($@)
       unshift @a, $timeout;
       $timeout = 10;
     }
-
-
     my $payload = join(" ", @a);
     return OPENgate_SshCommand($hash, $payload, $timeout, "1");
   }
+    # Execute Shell Command ....
+    if($prop eq "ship")
+    {
+        my $timeout = shift @a;
+        if($timeout eq 'timeout') {
+            $timeout = shift @a;
+        }
+        else{
+            unshift @a, $timeout;
+            $timeout = 10;
+        }
+        my $payload = join(" ", @a);
+        return OPENgate_SshCommandIp($hash, $payload, $timeout, undef);
+    }
+
+    # Execut Shell Command ....
+    if($prop eq "suship")
+    {
+        my $timeout = shift @a;
+        if($timeout eq 'timeout') {
+            $timeout = shift @a;
+        }
+        else{
+            unshift @a, $timeout;
+            $timeout = 10;
+        }
+        my $payload = join(" ", @a);
+        return OPENgate_SshCommandIp($hash, $payload, $timeout, "1");
+    }
+    
 
   my $value = join(" ", @a);  
 
@@ -167,7 +195,7 @@ OPENgate_Define($$)
     
     $hash->{NOTIFYDEV} = "global";
     
-    $hash->{VERSION} = "2021-12-15_12:25:30";
+    $hash->{VERSION} = "2021-12-21_15:05:29";
 
     OPENgate_InitializeInternalUrn($hash);
     
@@ -461,6 +489,31 @@ OPENgate_SshCommand(@)
     $hash->{ShellCommandRetCode} = $ret;
   }
   return $hash->{ShellCommandRes};
+}
+
+sub
+OPENgate_SshCommandIp(@)
+{
+    my ($hash, $command, $timeout, $sudo) = @_;
+    if(defined($sudo))
+    {
+        my $qxcmd = "ssh -i /opt/fhem/.ssh/id_ed25519 deos\@172.17.0.1 \"sudo bash -c \'$command\'\"";
+        $hash->{ShellCommand} = $command;
+        my @result = exec_safe($qxcmd, $timeout, 3);
+        my $ret = pop(@result);
+        $hash->{ShellCommandRes} = join("\n", @result); #qx($qxcmd);
+        $hash->{ShellCommandRetCode} = $ret;
+    }
+    else
+    {
+        my $qxcmd = "ssh -i /opt/fhem/.ssh/id_ed25519 deos\@172.17.0.1 \"bash -c \'$command\'\"";
+        $hash->{ShellCommand} = $command;
+        my @result = exec_safe($qxcmd, $timeout, 3);
+        my $ret = pop(@result);
+        $hash->{ShellCommandRes} = join("\n", @result); #qx($qxcmd);
+        $hash->{ShellCommandRetCode} = $ret;
+    }
+    return $hash->{ShellCommandRes};
 }
 
 sub exec_safe {
