@@ -1,4 +1,5 @@
 OPENgate last changes:
+2022-01-13 FupPage name can be length 8.3
 2021-12-15 Added command for ssh tunnel over ip
 2021-12-15 MqttClient init if Parameter set
 2021-12-06

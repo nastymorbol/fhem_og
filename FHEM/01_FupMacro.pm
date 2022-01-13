@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 01_FupMacro.pm 14589 2021-11-22 18:09:07Z sschulze $
+# $Id: 01_FupMacro.pm 14656 2022-01-13 07:42:13Z sschulze $
 # History
 # 2021-11-05 Initital commit
 # 2021-11-20 Changed command structure
@@ -282,7 +282,8 @@ sub FupMacro_Attr($$$$)
                 {
                     return "Error label name [$fullLabelName] is not valid."
                 }
-                if(defined($fupPage) and length($fupPage)>8)
+                # 2022-01-13 FupPage Name can be length 8.3 ...
+                if(defined($fupPage) and length($fupPage) > 12)
                 {
                     return "Error FupPage name [$fupPage] is to long."
                 }
@@ -329,7 +330,7 @@ FupMacro_Define($$)
     
     return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]" if(int(@a) < 2);
     
-    $hash->{VERSION} = "2021-11-22_18:09:07";
+    $hash->{VERSION} = "2022-01-13_07:42:13";
     
     my $type = shift @a;
     my $iodev = shift @a;

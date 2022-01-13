@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 02_BACnetDatapoint.pm 11109 2021-11-20 00:53:20Z sschulze $
+# $Id: 02_BACnetDatapoint.pm 11065 2021-12-22 12:41:47Z sschulze $
 # History
 # 2021-09-13 Datapoint define now possible with missing BACnet Device
 # 2021-08-10 Add prop_presentValue setter as default
@@ -123,7 +123,6 @@ BACnetDatapoint_Set($$)
   }
   elsif($cmd =~ /DriverRes/)
   {
-    #my ($rcmd, $rprop, $rval, $rerr) = @a;
     my $value = join ' ', @a;
     #$hash->{DriverRes} = join ' ', @a;
 
@@ -216,7 +215,7 @@ BACnetDatapoint_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
-  $hash->{VERSION} = "2021-11-20_00:53:20";
+  $hash->{VERSION} = "2021-12-22_12:41:47";
 
   my $name = shift @a;
   my $type = shift @a;

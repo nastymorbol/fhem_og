@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 01_BACnetDevice.pm 14302 2021-11-20 00:53:06Z sschulze $
+# $Id: 01_BACnetDevice.pm 13832 2021-12-22 12:43:25Z sschulze $
 # History
 # 2020-12-02 encoding attribute hinzugefügt
 # 2021-03-10 DriverRes wird nicht mehr getriggert
@@ -196,18 +196,6 @@ BACnetDevice_Set($$)
       }
     }
 
-    # Der Treiber schickt unmittelbar nach empfang eines Commandos auf dem DriverReq
-    # eine Empfangsbestätigung auf DriverRes mit dem Commando + exec
-    # In dem Fall muss der Request um exec erweitert werden, damit befehle nicht doppelt gestartet werden
-    if($hash->{DriverRes} =~ /exec/)
-    {
-      if($hash->{DriverReq} !~ /exec/)
-      {
-        $hash->{DriverReq} .= " > exec" ;
-        DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-      }
-    }
-
     DoTrigger($name, "DriverRes: " . $hash->{DriverRes});
     return undef;
   }
@@ -267,7 +255,7 @@ BACnetDevice_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
 
-  $hash->{VERSION} = "2021-11-20_00:53:06";
+  $hash->{VERSION} = "2021-12-22_12:43:25";
 
   my $name = shift @a;
   my $type = shift @a;
