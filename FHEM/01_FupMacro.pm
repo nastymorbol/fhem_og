@@ -29,7 +29,7 @@ FupMacro_Initialize($)
 
 ###################################
 sub
-FupMacro_Get($$$)
+FupMacro_Get($$$@)
 {
     my ( $hash, $name, $opt, @args ) = @_;
 
@@ -74,6 +74,8 @@ FupMacro_Get($$$)
             return '[]';
         }
         
+        my $searchPattern = shift(@args);
+
         my @entries = split(/[,\n]/, $attrValue);
         my @labelDatas;
         foreach (@entries) {
@@ -83,14 +85,45 @@ FupMacro_Get($$$)
                 next;
             }
             my %labelData=();
+            # check for FupPage name in Label name
+            if(index($label, ':') == -1)
+            {
+                $label = uc($hash->{FupPageName}) . ':' . $label;
+            }
             $labelData{name} = $label;
             $labelData{reading} = $reading;
+            if($searchPattern)
+            {
+                my $isReading = ReadingsVal($name, $searchPattern, undef);
+                if($isReading)
+                {
+                    if($reading eq $searchPattern)
+                    {
+                        return(to_json(\%labelData));
+                    }
+                }
+                else {
+                    my $colonIndex = index($searchPattern, ':');
+                    if ($colonIndex == -1) {
+                        $searchPattern = uc($hash->{FupPageName}) . ':' . $searchPattern;
+                    }
+                    else {
+                        $searchPattern = uc(substr($searchPattern, 0, $colonIndex)) . ':' . substr($searchPattern, $colonIndex + 1);
+                    }
+
+                    if($label eq $searchPattern)
+                    {
+                        return(to_json(\%labelData));
+                    }
+                }
+            }
             push(@labelDatas, \%labelData);
         }
         
         return(to_json(\@labelDatas));
     }
-    push @setList, "LabelData:noArg";
+    #push @setList, "LabelData:noArg";
+    push @setList, "LabelData";
 
     if($opt eq 'LabelValues')
     {
@@ -108,13 +141,7 @@ FupMacro_Get($$$)
 }
 
 ###################################
-sub FupMacro_isInt{
-	return  ($_[0] =~/^-?\d+$/)?1:0;
-}
 
-sub FupMacro_isNotInt{
-	return  ($_[0] =~/^-?\d+$/)?0:1;
-}
 
 
 sub
@@ -126,7 +153,6 @@ FupMacro_Set($@)
     return "no set value specified" if(int(@a) < 1);
     
     my $cmd = shift @a;
-    my @setList = ();
 
     if($cmd =~ /DriverRes/)
     {
@@ -168,14 +194,12 @@ FupMacro_Set($@)
         fhem("attr $name $cmd $value");
         return undef;
     }
-    push @setList, "pollInterval";
 
     if($cmd eq 'AddLabel')
     {
         my $value = join '|', @a;
         return fhem("attr -a $name labels ,$value");
     }
-    push @setList, "AddLabel";
 
     if($cmd eq 'ScanLabel')
     {
@@ -187,7 +211,6 @@ FupMacro_Set($@)
         DoTrigger($hash, "DriverReq: " . $hash->{DriverReq});
         return undef;
     }
-    push @setList, "ScanLabel:noArg";
 
     if($cmd eq 'RemoveLabel')
     {
@@ -207,8 +230,59 @@ FupMacro_Set($@)
         
         return(undef);
     }
-    push @setList, "RemoveLabel";
+
+    if($cmd eq 'WriteLabel')
+    {
+        $cmd = shift @a;
+    }
+    # If setter is Reading, then send write Label Command
+    my $currentValue = ReadingsVal($name, $cmd, undef);
+    my $json = undef;
+    if(not defined $currentValue)
+    {
+        # Try to pars Reading name if Label is given ...
+        $json = FupMacro_Get($hash, $name, "LabelData", $cmd);
+        if(index($json, '{') == 0 && index($json, '}') > 2)
+        {
+            $cmd = from_json($json)->{reading};
+            $currentValue = ReadingsVal($name, $cmd, undef);
+        }
+    }
+    if($currentValue)
+    {
+        # set ISPHS26_system scan_C1ERRO_ULI_4 33
+        # set ISPHS26_system C1ERRO 33
+        # setreading ISPHS26_system scan_C1ERRO_ULI_4 33
+        my $newValue = shift(@a);
+        if($newValue)
+        {
+            $json = FupMacro_Get($hash, $name, "LabelData", $cmd) if not defined $json;
+            # check for empty array
+            if(index($json, '{') == 0 && index($json, '}') > 2) {
+                my $label = from_json($json)->{name};
+                if($label)
+                {
+                    my $ioDev = $hash->{IODev};
+                    my $devHash = $defs{$ioDev};
+                    $devHash->{DriverReq} = "CMD:WriteLabel $name $label $newValue";
+                    DoTrigger($ioDev, "DriverReq: " . $devHash->{DriverReq});
+                    $hash->{DriverReq} = "CMD:Delegate WriteLabel $label [$newValue] to $ioDev";
+                    DoTrigger($hash, "DriverReq: " . $hash->{DriverReq});
+                    #return "Write Label Reading: $cmd CurrentValue: $currentValue NewValue: $newValue";
+                    return(undef);
+                }
+            }
+            return "ERROR: JSON empty [$json] " . index($json, '[') . " : " . index($json, ']') ;
+        }
+        return "ERROR: No value in set command [$newValue]";
+    }
     
+    my @setList = ();
+    push @setList, "pollInterval";
+    push @setList, "AddLabel";
+    push @setList, "ScanLabel:noArg";
+    push @setList, "RemoveLabel";
+    push @setList, "WriteLabel";
     return join ' ', @setList;
 }
 
@@ -412,6 +486,16 @@ FupMacro_Define($$)
     return undef;
 }
 
+###### HELPER FUNCTIONS
+sub FupMacro_isInt{
+    return  ($_[0] =~/^-?\d+$/)?1:0;
+}
+
+sub FupMacro_isNotInt{
+    return  ($_[0] =~/^-?\d+$/)?0:1;
+}
+######
+
 1;
 
 =pod
@@ -426,55 +510,116 @@ FupMacro_Define($$)
 
   Define a FupMacro. A FupMacro can take via <a href="#set">set</a> any values.
   Used for programming.
-  <br><br>
+  <br/><br/>
 
   <a name="FupMacrodefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; FupMacro &lt;URL&gt;</code>
-    <br><br>
+    <code>define &lt;name&gt; FupMacro &lt;OPENems&gt;</code>
+    <br/><br/>
 
     Example:
     <ul>
-      <code>define MyFupMacro FupMacro http://192.168.123.199</code><br>
-      <code>set MyFupMacro AddReceipe 1:60:My Receipe</code><br>
+      <code>define MyFupMacro FupMacro myOPENemsController</code><br/>
+      <code>set MyFupMacro ScanLabel</code><br/>
     </ul>
   </ul>
-  <br>
+  <br/>
 
   <b>Set</b>
-  <li><a name="AddReceipe"></a>
-    <code>set &lt;name&gt; AddReceipe &lt;1:60:My Receipe&gt</code><br>
-    Format for ReceipeInfo:<br/>
-    <p>
-      PlantIndex:UptateInterval[s]:ReceipeName <br/>
-      1:60:AHU001 <br/>
-    </p>
-    Adds or Updates an FupMacro Receipe information. <br/>
-    The Receipe Infos are stored in an Attribute named after the Receipe name.
-  </li>
-  <li><a name="ScanReceipes"></a>
-    <code>set &lt;name&gt; ScanReceipes [Interval]</code><br>
-    Not implemented yet.
-  </li>
-  <br>
+  <ul>
+      <li><a name="WriteLabel">WriteLabel</a><br/>
+        <code>set [$NAME] ReadingName Value </code><br/>
+        <code>set [$NAME] WriteLabel ReadingName Value </code><br/>
+        Writes the Value to the Label, which is assigned to the given ReadingName        
+      </li>
+      
+      <li><a name="AddLabel">AddLabel</a><br/>
+        <code>set <$NAME> AddLabel E06 ReadingName </code><br/>
+        Adds an Label Configuration to the <a href="#labelsAttr">labels Attribute</a>        
+      </li>
+      <li><a name="RemoveLabel">RemoveLabel</a><br/>
+        <code>set <$NAME> RemoveLabel E06 </code><br/>
+        Removes an Label Configuration from the <a href="#labelsAttr">labels Attribute</a>
+      </li>
+      <li><a name="ScanLabel">ScanLabel</a> (see also <a href="#ClearScanResults">ClearScanResult</a>)<br/>
+        <code>set <$NAME> ScanLabel</code><br/>
+        Scans all Labels within this FupPage. This can take some time! <br/>
+        After successful Label scanning, all found Label will be added to the <a href="#labelsAttr">labels Attribute</a>. <br/>
+        After reaching the poll interval, all scanned Labels will be updated.<br/><br/>
+        The Readingname will have the following format.        
+        <ul>
+            scan_&lt;LABELNAME&gt;_&lt;DATATYPE&gt;_&lt;LEN&gt;[_USTBDFTEXT] <br/>
+            scan_C1ERRO_ULI_4_MaybeSomeText
+        </ul>
+        
+      </li>
+  </ul><br/>
 
   <a name="FupMacroget"></a>
-  <b>Get</b> <ul>N/A</ul><br>
+  <b>Get</b>
+  <ul>
+      </li>
+        <li><a name="ClearScanResult">ClearScanResult</a><br/>
+        <code>
+        get &lt;$NAME&gt; ClearScanResult    
+        </code><br/><br/>
+        Clears all Label readings, that are added threw an automated Label Scan. <br/>
+        
+      </li>
+      <li><a name="LabelData">LabelData</a><br/>
+        <code>
+        get &lt;$NAME&gt; LabelData [searchPattern]    
+        </code><br/><br/>
+        Returns Label informations as json object. If the given search pattern is empty, or not found, then the returned json object
+        is a list of all label infos.
+        <br/>
+        The Searchpattern can be Labelname only or an FQDN Labelname. <br/>
+        In case of Labelname only, the Searchpattern will be expanded threw 
+        the FupPageName internal in this FupMacro. <br/>
+        E06 will be expanded to zeit.f:E06 <br/>
+        <br/>Example:<br/>
+        <ul>
+        <code>
+            get &lt;$NAME&gt; LabelData E06 <br/>
+            {"reading":"scan_C1ERRO_ULI_4","name":"SYSTEM:C1ERRO"} <br/>
+            <br/>
+            get &lt;$NAME&gt; LabelData <br/>
+            [{"reading":"scan_C1ERRO_ULI_4","name":"SYSTEM:C1ERRO"}] <br/>
+        </code></ul><br/>
+      </li>
+        <li><a name="LabelValues">LabelValues</a><br/>
+        <code>
+        get &lt;$NAME&gt; LabelValues    
+        </code><br/><br/>
+        Reads all Label Values and Updates the Corresponding Readings. If the reading doesn't exists, it will be created. <br/>
+        <br/>
+        This is in delegate command. The Command will be delegated to the corresponding OPENems in the IODev Internal. The
+        OPENems Device will then asynchronously update the values. <br/>
+        <br/>Example:<br/>
+        <code>
+            get &lt;$NAME&gt; LabelValues <br/>
+        </code><br/>
+      </li>
+    </ul>
+  <br/>
 
   <a name="FupMacroattr"></a>
   <b>Attributes</b>
   <ul>    
-    <li><a name="readingList">readingList</a><br>
-      Space separated list of readings, which will be set, if the first
-      argument of the set command matches one of them.</li>
+    <li><a name="labelsAttr">labels</a><br/>
+      Comma separated list of readings, which will be updated threw an Label value.
+      <p>
+      C1ERRO|scan_C1ERRO_ULI_4, C1SENT|scan_C1SENT_ULI_4
+      </p>
+    </li>
 
-    <li><a name="setList">setList</a><br>
+    <li><a name="setList">setList</a><br/>
       Space separated list of commands, which will be returned upon "set name
       ?", so the FHEMWEB frontend can construct a dropdown and offer on/off
       switches. Example: attr dummyName setList on off </li>
 
-    <li><a name="useSetExtensions">useSetExtensions</a><br>
+    <li><a name="useSetExtensions">useSetExtensions</a><br/>
       If set, and setList contains on and off, then the
       <a href="#setExtensions">set extensions</a> are supported.
       In this case no arbitrary set commands are accepted, only the setList and
@@ -482,7 +627,7 @@ FupMacro_Define($$)
 
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
-  <br>
+  <br/>
 
 </ul>
 

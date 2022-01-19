@@ -263,17 +263,21 @@ OPENems_Define($$)
   <br>
 
   <b>Set</b>
-  <li><a name="ScanTrendSlots"></a>
-    <code>set &lt;name&gt; ScanTrendSlots</code><br>
-    Scans all Trend Slots Configruations in the OPENems Controller.
-    All Slots will be configured threw Attributes
-    
-  </li>
+    <ul>
+    N/A
+    </ul>
   <br>
 
   <a name="OPENemsget"></a>
-  <b>Get</b> <ul>N/A</ul><br>
-
+  <b>Get</b> 
+    <ul>  
+      <li><a name="ScanTrendSlots">ScanTrendSlots</a><br>
+          Scans all Trend Slots Configurations in the OPENems Controller. <br>
+          All Slots will be configured threw Attributes    
+      </li>
+    </ul>
+  <br>
+  
   <a name="OPENemsattr"></a>
   <b>Attributes</b>
   <ul>    
