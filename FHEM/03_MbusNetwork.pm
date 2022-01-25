@@ -1,30 +1,70 @@
 ##############################################
-# $Id: 00_OPENems.pm 7310 2022-01-18 20:41:29Z sschulze $
+# $Id: 03_MbusNetwork.pm 8234 2022-01-25 12:06:15Z sschulze $
 # History
-# 2021-09-11 Initital commit
+# 2022-01-25 Initital commit
 
 package main;
 
 use strict;
 use warnings;
-use SetExtensions;
 
 sub
-OPENems_Initialize($)
+MbusNetwork_Initialize($)
 {
   my ($hash) = @_;
 
-  $hash->{GetFn}     = "OPENems_Get";
-  $hash->{SetFn}     = "OPENems_Set";
-  $hash->{DefFn}     = "OPENems_Define";
-  $hash->{AttrFn}    = "OPENems_Attr";
+  $hash->{GetFn}     = "MbusNetwork_Get";
+  $hash->{SetFn}     = "MbusNetwork_Set";
+  $hash->{DefFn}     = "MbusNetwork_Define";
+  $hash->{AttrFn}    = "MbusNetwork_Attr";
   $hash->{AttrList}  = "disable slot-[0-9]+-.* " .
                        $readingFnAttributes;
 }
 
+sub
+MbusNetwork_Define($$)
+{
+  my ($hash, $def) = @_;
+  my @a = split("[ \t][ \t]*", $def);
+
+  my $name = shift @a;
+
+  return "Wrong syntax: use define <name> MbusNetwork ip:port [TCP|UDP]" if(int(@a) < 2);
+
+  $hash->{VERSION} = "2022-01-25_12:06:15";
+
+  if(not defined AttrVal($name,"room", undef)) {
+    $attr{$name}{room} = 'MbusNetwork';
+  }
+
+  my $type = shift @a;
+  my $url = shift @a;
+  my $protocol = shift @a;
+  
+  $protocol = "TCP" if(not defined($protocol));
+  $protocol = uc $protocol;
+  
+  my $colonIndex =index($url, ':'); 
+  if ($colonIndex == -1) {
+    return "Wrong syntax: use define <name> MbusNetwork ip:port";
+  }
+
+  $hash->{URL} = $url;
+  $hash->{IP} = substr($url, 0, $colonIndex);
+  $hash->{PORT} = substr($url, $colonIndex +1);
+  $hash->{PROTOCOL} = $protocol;
+  $hash->{DriverReq} = "N/A";
+  $hash->{DriverRes} = "N/A";
+  $hash->{STATE} = "Init";
+
+  OPENgate_InitializeInternalUrn($hash);
+
+  return undef;
+}
+
 ###################################
 sub
-OPENems_Get($$$)
+MbusNetwork_Get($$$)
 {
   my ( $hash, $name, $opt, @args ) = @_;
   
@@ -37,38 +77,32 @@ OPENems_Get($$$)
 
   my @setList = ();
   
-  if($opt eq "ScanFupPages")
+  if($opt eq "ScanMeter")
   {
-    $hash->{DriverReq} = "CMD:ScanFupPages";
+    $hash->{DriverReq} = "CMD:ScanMeter";
+    if(@args)
+    {
+      $hash->{DriverReq} .= " " . join(' ', @args);
+    }
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return "OK";
   }
-  push @setList, "ScanFupPages:noArg";
+  push @setList, "ScanMeter";
 
-  if($opt eq "ScanTrendSlots")
+  if($opt eq "CancelScanMeter")
   {
-    $hash->{DriverReq} = "CMD:ScanTrendSlots";
+    $hash->{DriverReq} = "CMD:CancelScanMeter";
     DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
     return "OK";
   }
-  push @setList, "ScanTrendSlots:noArg";
-
-  return "unknown argument choose one of " . join(' ', @setList);
+  push @setList, "CancelScanMeter:noArg";
   
+  
+  return "unknown argument choose one of " . join(' ', @setList);
 }
-
-###################################
-sub OPENems_isInt{
-	return  ($_[0] =~/^-?\d+$/)?1:0;
-}
-
-sub OPENems_isNotInt{
-	return  ($_[0] =~/^-?\d+$/)?0:1;
-}
-
 
 sub
-OPENems_Set($@)
+MbusNetwork_Set($@)
 {
   my ($hash, @a) = @_;
   my $name = shift @a;
@@ -123,7 +157,7 @@ OPENems_Set($@)
       {
         #$hash->{DriverReq} = $hash->{DriverReq} =~ s/CMD://r;
         $hash->{DriverReq} .= " > exec" ;
-        # DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+        #DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
       }
     }
     
@@ -160,7 +194,7 @@ OPENems_Set($@)
   return join ' ', @setList;
 }
 
-sub OPENems_Attr($$$$)
+sub MbusNetwork_Attr($$$$)
 {
 	my ( $cmd, $name, $attrName, $attrValue ) = @_;
     
@@ -170,7 +204,7 @@ sub OPENems_Attr($$$$)
     
 	if ($cmd eq "set") {
     if ($attrName =~ "slot_.*_name") {
-      # json2nameValue('{"Interval":3600, "Controller":1, "Name":"My Receipe name on OPENems"}')
+      # json2nameValue('{"Interval":3600, "Controller":1, "Name":"My Receipe name on MbusNetwork"}')
 			#my $json = json2nameValue($attrValue);
       #return "Error in 'Name' field ($attrValue)" if (not $json->{Name});
       #return "Error in 'Interval' field ($attrValue)" if (not $json->{Interval});
@@ -180,125 +214,106 @@ sub OPENems_Attr($$$$)
 	return undef;
 }
 
-sub
-OPENems_Define($$)
-{
-  my ($hash, $def) = @_;
-  my @a = split("[ \t][ \t]*", $def);
+###################################
+sub MbusNetwork_isInt{
+  return  ($_[0] =~/^-?\d+$/)?1:0;
+}
 
-  my $name = shift @a;
-
-  return "Wrong syntax: use define <name> OPENems http[s]://ip[:port]" if(int(@a) != 2);
-
-  $hash->{VERSION} = "2022-01-18_20:41:29";
-
-  if(AttrVal($name,"room", undef)) {
-    
-  } else {
-    $attr{$name}{room} = 'OPENems';
-  }
-
-  my $type = shift @a;
-  my $url = shift @a;
-
-  if (index($url, 'http') == -1) {
-    return "Wrong syntax: use define <name> OPENems http[s]://ip[:port]";
-  }
-
-  if(substr($url, -1) eq "/")
-  {
-    $url = substr($url, 0, -1);
-  }
-  
-  my $ipIndex = rindex($url, ':');
-  if ($ipIndex < 7) {
-    if (index($url, 'https://') == -1) {
-      $url .= ":80";
-    }
-    else {
-      $url .= ":443";
-    }    
-  }
-  my $ip = substr($url, index($url, ':') +3);
-  
-  $hash->{URL} = $url;
-  $hash->{IP} = $ip;
-  $hash->{DriverReq} = "N/A";
-  $hash->{DriverRes} = "N/A";
-  $hash->{STATE} = "Init";
-
-  OPENgate_InitializeInternalUrn($hash);
-
-  return undef;
+sub MbusNetwork_isNotInt{
+  return  ($_[0] =~/^-?\d+$/)?0:1;
 }
 
 1;
 
 =pod
 =item helper
-=item summary    OPENems device
-=item summary_DE OPENems Ger&auml;t
+=item summary    MbusNetwork device
+=item summary_DE MbusNetwork Ger&auml;t
 =begin html
 
-<a name="OPENems"></a>
-<h3>OPENems</h3>
+<a name="MbusNetwork"></a>
+<h3>MbusNetwork</h3>
 <ul>
 
-  Define a OPENems. A OPENems can take via <a href="#set">set</a> any values.
-  Used for programming.
-  <br><br>
+  Define a MbusNetwork. The Network describes the Physical connection to the Mbus Gateway or Interface converter. 
+  At the Moment, only TCP or UDP connections are available. Serial Connection is technically implemented but will 
+  not be public available.
+  <br/><br/>
 
-  <a name="OPENemsdefine"></a>
+  <a name="MbusNetworkdefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; OPENems &lt;URL&gt;</code>
-    <br><br>
+    <code>define &lt;name&gt; MbusNetwork &lt;URL&gt; [TCP|UDP]</code>
+    <br/><br/>
 
     Example:
     <ul>
-      <code>define MyOPENems OPENems http://192.168.123.199</code><br>
-      <code>set MyOPENems ScanTrendSlots</code><br>
+      <code>define MyMbusNetwork MbusNetwork 192.168.123.199:5000 TCP</code><br/>
+      <code>get MyMbusNetwork ScanMeter</code><br/>
     </ul>
   </ul>
-  <br>
+  <br/>
 
+  <a name="MbusNetworkset"></a>
   <b>Set</b>
     <ul>
     N/A
     </ul>
-  <br>
+  <br/>
 
-  <a name="OPENemsget"></a>
+  <a name="MbusNetworkget"></a>
   <b>Get</b> 
     <ul>  
-      <li><a name="ScanTrendSlots">ScanTrendSlots</a><br>
-          Scans all Trend Slots Configurations in the OPENems Controller. <br>
-          All Slots will be configured threw Attributes    
+      <li><a name="ScanMeter">ScanMeter [timeout] [range]</a><br/>
+          Scans all MBUS-Meter. The Default Timeout ist 1500ms.<br/>
+          If the value for timeout is smaller then 251, this value will be interpreted as an primary Meter Address<br/>
+          <ul>primary   address range: 1,2,1-10,30-40</ul>
+          <ul>primary   address range: 2500 1,2,1-10,30-40 (Page Ranges ;-))</ul>
+          <ul>secondary address range: #FF000000</ul>
+          <br/>
+          Secondary Address is the Start Range
+      </li>
+      <li><a name="CancelScanMeter">CancelScanMeter</a><br/>
+          Cancels an running Meter Scan
       </li>
     </ul>
-  <br>
+  <br/>
   
-  <a name="OPENemsattr"></a>
+  <a name="MbusNetworkreading"></a>
+  <b>Readings</b>
+  <ul>    
+    <li><a name="last-scan-result">last-scan-result</a><br/>
+      Contains the result of the last Scan result. On Scan start, this reading will be erased.<br/>
+      The Scan result will be stored as an JsonObject string.<br/>
+      <code>
+      [ 
+        {
+          "adr": 1,
+          "id": 5544332211,
+          "mnf": "MBE",
+          "dvt": "Energy",
+          "rcc": 12
+        }
+      ]
+      </code>
+    </li>
+  </ul><br/>
+  
+  <a name="MbusNetworkattr"></a>
   <b>Attributes</b>
   <ul>    
-    <li><a name="readingList">readingList</a><br>
+    <li><a name="readingList">readingList</a><br/>
       Space separated list of readings, which will be set, if the first
       argument of the set command matches one of them.</li>
 
-    <li><a name="setList">setList</a><br>
+    <li><a name="setList">setList</a><br/>
       Space separated list of commands, which will be returned upon "set name
       ?", so the FHEMWEB frontend can construct a dropdown and offer on/off
       switches. Example: attr dummyName setList on off </li>
 
-    <li><a name="useSetExtensions">useSetExtensions</a><br>
-      If set, and setList contains on and off, then the
-      <a href="#setExtensions">set extensions</a> are supported.
-      In this case no arbitrary set commands are accepted, only the setList and
-      the set exensions commands.</li>
-
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
   </ul>
-  <br>
+  <br/>
 
 </ul>
 
