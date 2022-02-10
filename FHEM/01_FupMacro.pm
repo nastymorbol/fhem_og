@@ -235,6 +235,7 @@ FupMacro_Set($@)
     {
         $cmd = shift @a;
     }
+
     # If setter is Reading, then send write Label Command
     my $currentValue = ReadingsVal($name, $cmd, undef);
     my $json = undef;
@@ -254,6 +255,7 @@ FupMacro_Set($@)
         # set ISPHS26_system C1ERRO 33
         # setreading ISPHS26_system scan_C1ERRO_ULI_4 33
         my $newValue = shift(@a);
+    
         if($newValue)
         {
             $json = FupMacro_Get($hash, $name, "LabelData", $cmd) if not defined $json;
@@ -271,6 +273,11 @@ FupMacro_Set($@)
                     #return "Write Label Reading: $cmd CurrentValue: $currentValue NewValue: $newValue";
                     return(undef);
                 }
+            }
+            else {
+                readingsSingleUpdate($hash, $cmd, $newValue, 1);
+                #return($currentValue . " -> " . $newValue . " --> " .  $json);
+                return(undef);
             }
             return "ERROR: JSON empty [$json] " . index($json, '[') . " : " . index($json, ']') ;
         }
