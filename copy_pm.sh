@@ -1,6 +1,15 @@
 #!/bin/bash
 
-array=( "03_MbusNetwork.pm" "00_OPENems.pm" "01_FupMacro.pm" "00_BACnetNetwork.pm" "01_BACnetDevice.pm" "02_BACnetDatapoint.pm" "00_OPENgate.pm" "00_OPENweb.pm" "99_myUtils.pm")
+array=("FHEM"/*.pm)
+for entry in "${array[@]}"
+do
+  file=`basename $entry`
+  #echo "$file"
+done
+
+#exit 1
+
+#array=( "03_MbusNetwork.pm" "00_OPENems.pm" "01_FupMacro.pm" "00_BACnetNetwork.pm" "01_BACnetDevice.pm" "02_BACnetDatapoint.pm" "00_OPENgate.pm" "00_OPENweb.pm" "99_myUtils.pm")
 
 user=root
 ip=192.168.123.59
@@ -13,8 +22,9 @@ echo Connect $ip with cert: $id
 
 ssh $user@$ip -i $id "sudo bash -c 'mkdir /tmp/fhem; chown -R deos:deos /tmp/fhem'"
 
-for file in "${array[@]}"
+for entry in "${array[@]}"
 do
+    file=`basename $entry`
     scp  -i $id FHEM/$file $user@$ip:/tmp/fhem/
     ssh $user@$ip -i $id "sudo bash -c 'mv -f /tmp/fhem/$file /docker/runtime/fhem/FHEM/$file;chown 6061:6061 /docker/runtime/fhem/FHEM/$file;cd /docker/runtime/fhem; perl fhem.pl 7072 \"reload $file\"'"
     #scp src/$file $user@$ip:/docker/runtime/fhem/FHEM    
