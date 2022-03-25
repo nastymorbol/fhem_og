@@ -16,6 +16,8 @@ open($filehandle, '>', "update_mods.txt") or die $!;
 writeUpdateFile($filehandle, "FHEM/", @filenames);
 @filenames = getFiles("www/pgm2",);
 writeUpdateFile($filehandle, "www/pgm2/", @filenames);
+@filenames = getFiles("www/pgm2/images/",);
+writeUpdateFile($filehandle, "www/pgm2/images/", @filenames);
 @filenames = getFiles("www/images",);
 writeUpdateFile($filehandle, "www/images/", @filenames);
 @filenames = getFiles("www/images/default/",);

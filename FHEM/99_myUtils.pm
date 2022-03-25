@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 99_myUtils.pm 3345 2021-11-18 05:31:16Z sschulze $
+# $Id: 99_myUtils.pm 3349 2022-03-23 13:08:27Z sschulze $
 #
 # Save this file as 99_myUtils.pm, and create your own functions in the new
 # file. They are then available in every Perl expression.
@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use utf8;
 use Time::HiRes qw(time);
-use JSON;
+use JSON::PP;
 
 sub
 myUtils_Initialize($$)
