@@ -1,17 +1,18 @@
 ##############################################
-# $Id: 01_FupMacro.pm 20773 2022-03-25 10:11:06Z sschulze $
+# $Id: 01_FupMacro.pm 20826 2022-05-09 07:44:12Z sschulze $
 # History
-# 2021-11-05 Initital commit
+# 2021-11-05 Initial commit
 # 2021-11-20 Changed command structure
 # 2021-11-20 New Command read label values
 # 2021-11-22 FUP Page Name max Length corrected
+# 2022-05-09 Changed JSON Interpreter
 
 package main;
 
 use strict;
 use warnings;
 use SetExtensions;
-use JSON;
+use JSON::PP;
 
 sub
 FupMacro_Initialize($)
@@ -99,7 +100,7 @@ FupMacro_Get($$$@)
                 {
                     if($reading eq $searchPattern)
                     {
-                        return(to_json(\%labelData));
+                        return(encode_json(\%labelData));
                     }
                 }
                 else {
@@ -113,14 +114,14 @@ FupMacro_Get($$$@)
 
                     if($label eq $searchPattern)
                     {
-                        return(to_json(\%labelData));
+                        return(encode_json(\%labelData));
                     }
                 }
             }
             push(@labelDatas, \%labelData);
         }
         
-        return(to_json(\@labelDatas));
+        return(encode_json(\@labelDatas));
     }
     #push @setList, "LabelData:noArg";
     push @setList, "LabelData";
@@ -411,7 +412,7 @@ FupMacro_Define($$)
     
     return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]" if(int(@a) < 2);
     
-    $hash->{VERSION} = "2022-03-25_10:11:06";
+    $hash->{VERSION} = "2022-05-09_07:44:12";
     
     my $type = shift @a;
     my $iodev = shift @a;
