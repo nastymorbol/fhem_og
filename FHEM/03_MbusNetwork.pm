@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 03_MbusNetwork.pm 8234 2022-01-25 12:06:15Z sschulze $
+# $Id: 03_MbusNetwork.pm 8713 2022-05-25 06:27:56Z sschulze $
 # History
 # 2022-01-25 Initital commit
 
@@ -17,8 +17,7 @@ MbusNetwork_Initialize($)
   $hash->{SetFn}     = "MbusNetwork_Set";
   $hash->{DefFn}     = "MbusNetwork_Define";
   $hash->{AttrFn}    = "MbusNetwork_Attr";
-  $hash->{AttrList}  = "disable slot-[0-9]+-.* " .
-                       $readingFnAttributes;
+  $hash->{AttrList}  = "disable autocreate";
 }
 
 sub
@@ -31,7 +30,7 @@ MbusNetwork_Define($$)
 
   return "Wrong syntax: use define <name> MbusNetwork ip:port [TCP|UDP]" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-01-25_12:06:15";
+  $hash->{VERSION} = "2022-05-25_06:27:56";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusNetwork';
@@ -64,9 +63,11 @@ MbusNetwork_Define($$)
 
 ###################################
 sub
-MbusNetwork_Get($$$)
+MbusNetwork_Get($$$@)
 {
   my ( $hash, $name, $opt, @args ) = @_;
+  
+  #return "$hash -> $name -> $opt, " . join("|", @args);
   
   return "\"get $name\" needs at least one argument" unless(defined($opt));
   
@@ -89,6 +90,30 @@ MbusNetwork_Get($$$)
   }
   push @setList, "ScanMeter";
 
+  if($opt eq "CreateMeter")
+  {
+    $hash->{DriverReq} = "CMD:CreateMeter";
+    if(@args)
+    {
+      $hash->{DriverReq} .= " " . join(' ', @args);
+    }
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    return "OK";
+  }
+  push @setList, "CreateMeter";
+  
+  if($opt eq "ReadMeter")
+  {
+    $hash->{DriverReq} = "CMD:ReadMeter";
+    if(@args)
+    {
+      $hash->{DriverReq} .= " " . join(' ', @args);
+    }
+    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
+    return "OK";
+  }
+  push @setList, "ReadMeter";
+  
   if($opt eq "CancelScanMeter")
   {
     $hash->{DriverReq} = "CMD:CancelScanMeter";
@@ -167,30 +192,19 @@ MbusNetwork_Set($@)
   }
 
 
-  if($cmd eq "AddLabelByName")
-  {    
-    my $labelName = shift @a;
-    if(!defined $labelName || $labelName eq '')
+  if($cmd eq "AutoCreate")
+  {
+    my $value = (join ' ', @a) + 0;
+    if($value < 1)
     {
-        return "Error: Label name must have an value like 'zeit.f:E06'"
+      fhem("deleteattr $name autocreate");
+      return(undef);
     }
-    
-    my ($fupPage, $label) = split(':', $labelName);
-    if(!defined $fupPage || $fupPage eq '')
-    {
-        return "Error: Label name must have an value like 'zeit.f:E06'. FupPage part is not set"
-    }
-    if(!defined $label || $label eq '')
-    {
-        return "Error: Label name must have an value like 'zeit.f:E06'. Label part is not set"
-    }
-    
-    $hash->{DriverReq} = "CMD:AddLabelByName " . $labelName;
-    DoTrigger($name, "DriverReq: " . $hash->{DriverReq});
-    return undef;
+    fhem("attr $name autocreate 1");
+    return(undef);
   }
   
-  push @setList, "AddLabelByName";   
+  push @setList, "AutoCreate";   
   return join ' ', @setList;
 }
 
@@ -198,18 +212,15 @@ sub MbusNetwork_Attr($$$$)
 {
 	my ( $cmd, $name, $attrName, $attrValue ) = @_;
     
-  # $cmd  - Vorgangsart - kann die Werte "del" (löschen) oder "set" (setzen) annehmen
+    # $cmd  - Vorgangsart - kann die Werte "del" (löschen) oder "set" (setzen) annehmen
 	# $name - Gerätename
 	# $attrName/$attrValue sind Attribut-Name und Attribut-Wert
     
 	if ($cmd eq "set") {
-    if ($attrName =~ "slot_.*_name") {
-      # json2nameValue('{"Interval":3600, "Controller":1, "Name":"My Receipe name on MbusNetwork"}')
-			#my $json = json2nameValue($attrValue);
-      #return "Error in 'Name' field ($attrValue)" if (not $json->{Name});
-      #return "Error in 'Interval' field ($attrValue)" if (not $json->{Interval});
-      #return "Error in 'Controller' field ($attrValue)" if (not $json->{Controller});
-		}
+      if ($attrName =~ "autocreate") 
+      {
+        $_[3] = 1;
+      }
 	}
 	return undef;
 }
@@ -257,7 +268,9 @@ sub MbusNetwork_isNotInt{
   <a name="MbusNetworkset"></a>
   <b>Set</b>
     <ul>
-    N/A
+      <li><a name="AutoCreate">AutoCreate 1</a><br/>
+        If activated, all not existing NBUS-Devices will be created on Scan.<br/>
+      </li>
     </ul>
   <br/>
 
@@ -272,6 +285,19 @@ sub MbusNetwork_isNotInt{
           <ul>secondary address range: #FF000000</ul>
           <br/>
           Secondary Address is the Start Range
+      </li>
+      <li><a name="ReadMeter">ReadMeter [NAME|ADDRESS|SEC_ADDRESS] &lt;timeout=1500&gt; &lt;retries=3&gt; </a><br/>
+          Reads one MBUS-Meter Records. The Default Timeout ist 1500ms.<br/>
+          All running Scans on this network will be cancelled !!! <br/>
+          <ul>primary address: 1</ul>
+          <ul>primary address: 1 2500</ul>
+          <ul>
+              name    address: MyMbusMeter_1 <br/>
+              If the primary address of the Meter is unique, then the Primary Addressing is used. Otherwise
+              the a SlaveSelect with the secondary address is used.
+          </ul>
+          <br/>
+          
       </li>
       <li><a name="CancelScanMeter">CancelScanMeter</a><br/>
           Cancels an running Meter Scan
