@@ -1,8 +1,9 @@
 ##############################################
-# $Id: 01_BACnetDevice.pm 13832 2021-12-22 12:43:25Z sschulze $
+# $Id: 01_BACnetDevice.pm 14453 2022-05-13 08:45:01Z sschulze $
 # History
-# 2020-12-02 encoding attribute hinzugefügt
+# 2022-05-13 UseStaticBinding is now available threw Set Command
 # 2021-03-10 DriverRes wird nicht mehr getriggert
+# 2020-12-02 encoding attribute hinzugefügt
 
 package main;
 
@@ -237,10 +238,25 @@ BACnetDevice_Set($$)
     }
   }
 
+  if($cmd eq "UseStaticBinding")
+  {    
+    my $value = join ' ', @a;
+    if($value eq "0")
+    {
+      fhem("deleteattr $name useStaticBinding");
+    }
+    else
+    {
+      fhem("attr $name useStaticBinding $value");
+    }
+    return undef;
+  }
+
   #push @setList, "objectList:sortable,val1,val2";
   push @setList, "clearObjectList:noArg";
   push @setList, "createDatapoints";
   push @setList, "BacnetProperty";
+  push @setList, "UseStaticBinding:0,1";
 
   return join ' ', @setList;
 }
@@ -255,7 +271,7 @@ BACnetDevice_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDevice BACnetNetwork DeviceInstance IP[:Port] [RouterIp:RouterPort]" if(int(@a) < 5);
 
-  $hash->{VERSION} = "2021-12-22_12:43:25";
+  $hash->{VERSION} = "2022-05-13_08:45:01";
 
   my $name = shift @a;
   my $type = shift @a;
@@ -366,7 +382,10 @@ BACnetDevice_Define($$)
           <code>set bn_Device_47163 BacnetProperty AI:0 presentValue 44.5</code>
       </p>
     </li>
-
+    <li><a name="UseStaticBinding">UseStaticBinding</a><br>
+      Setzt das Attribute useStaticBinding auf den angebenen Wert.<br/>
+      Diese Funktion ist Sinnvoll, wenn die Geräte nicht auf Broadcast Nachtichten antworten können z.B.: in VPN Netwerken.
+    </li>
   </ul>
   <br>
 
