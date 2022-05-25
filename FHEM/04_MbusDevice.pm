@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 04_MbusDevice.pm 11193 2022-05-25 23:02:37Z sschulze $
+# $Id: 04_MbusDevice.pm 11194 2022-05-26 00:21:34Z sschulze $
 # History
 # 2022-01-25 Initital commit
 
@@ -30,7 +30,7 @@ MbusDevice_Define($$)
 
   return "Wrong syntax: use define <name> MbusDevice <MbusNetwork> <PRIMARY_ADDRESS|SECONDARY_ADDRESS>" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-05-25_23:02:37";
+  $hash->{VERSION} = "2022-05-26_00:21:34";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusDevice';
