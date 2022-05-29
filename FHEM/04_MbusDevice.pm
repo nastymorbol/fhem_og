@@ -1,7 +1,8 @@
 ##############################################
-# $Id: 04_MbusDevice.pm 11194 2022-05-26 00:21:34Z sschulze $
+# $Id: 04_MbusDevice.pm 11483 2022-05-29 06:50:09Z sschulze $
 # History
-# 2022-01-25 Initital commit
+# 2022-05-29 MapToBacnet Attribute added
+# 2022-01-25 Initial commit
 
 package main;
 
@@ -17,7 +18,7 @@ MbusDevice_Initialize($)
   $hash->{SetFn}     = "MbusDevice_Set";
   $hash->{DefFn}     = "MbusDevice_Define";
   $hash->{AttrFn}    = "MbusDevice_Attr";
-  $hash->{AttrList}  = "disable useSecondaryAddress retries retryPause timeout pollInterval";
+  $hash->{AttrList}  = "disable useSecondaryAddress retries retryPause timeout pollInterval mapToBacnet";
 }
 
 sub
@@ -30,7 +31,7 @@ MbusDevice_Define($$)
 
   return "Wrong syntax: use define <name> MbusDevice <MbusNetwork> <PRIMARY_ADDRESS|SECONDARY_ADDRESS>" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-05-26_00:21:34";
+  $hash->{VERSION} = "2022-05-29_06:50:09";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusDevice';
@@ -227,7 +228,20 @@ MbusDevice_Set($@)
     fhem("attr $name pollInterval $value");
     return(undef);
   }
-  push @setList, "UseSecondaryAddress Retries RetryPause Timeout PollInterval";   
+
+  
+  if($cmd eq "MapToBacnet")
+  {
+    my $value = join ' ', @a;
+    if($value eq "")
+    {
+      fhem("deleteattr $name mapToBacnet");
+      return(undef);
+    }
+    fhem("attr $name mapToBacnet 1");
+    return(undef);
+  }
+  push @setList, "UseSecondaryAddress Retries RetryPause Timeout PollInterval MapToBacnet";   
   return join ' ', @setList;
 }
 
