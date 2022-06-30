@@ -1,7 +1,8 @@
 ##############################################
-# $Id: 04_MbusDevice.pm 11483 2022-05-29 06:50:09Z sschulze $
+# $Id: 04_MbusDevice.pm 11786 2022-06-30 23:47:55Z sschulze $
 # History
-# 2022-05-29 MapToBacnet Attribute added
+# 2022-06-30 frameCount Attribute added
+# 2022-05-29 mapToBacnet Attribute added
 # 2022-01-25 Initial commit
 
 package main;
@@ -18,7 +19,7 @@ MbusDevice_Initialize($)
   $hash->{SetFn}     = "MbusDevice_Set";
   $hash->{DefFn}     = "MbusDevice_Define";
   $hash->{AttrFn}    = "MbusDevice_Attr";
-  $hash->{AttrList}  = "disable useSecondaryAddress retries retryPause timeout pollInterval mapToBacnet";
+  $hash->{AttrList}  = "disable useSecondaryAddress retries retryPause timeout pollInterval mapToBacnet frameCount";
 }
 
 sub
@@ -31,7 +32,7 @@ MbusDevice_Define($$)
 
   return "Wrong syntax: use define <name> MbusDevice <MbusNetwork> <PRIMARY_ADDRESS|SECONDARY_ADDRESS>" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-05-29_06:50:09";
+  $hash->{VERSION} = "2022-06-30_23:47:55";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusDevice';
@@ -184,6 +185,7 @@ MbusDevice_Set($@)
     fhem("attr $name useSecondaryAddress 1");
     return(undef);
   }
+  
   if($cmd eq "Retries")
   {
     my $value = (join ' ', @a) + 0;
@@ -195,6 +197,7 @@ MbusDevice_Set($@)
     fhem("attr $name retries $value");
     return(undef);
   }
+  
   if($cmd eq "Timeout")
   {
     my $value = (join ' ', @a) + 0;
@@ -206,6 +209,7 @@ MbusDevice_Set($@)
     fhem("attr $name timeout $value");
     return(undef);
   }
+  
   if($cmd eq "RetryPause")
   {
     my $value = (join ' ', @a) + 0;
@@ -217,6 +221,7 @@ MbusDevice_Set($@)
     fhem("attr $name retryPause $value");
     return(undef);
   }
+  
   if($cmd eq "PollInterval")
   {
     my $value = join ' ', @a;
@@ -228,7 +233,6 @@ MbusDevice_Set($@)
     fhem("attr $name pollInterval $value");
     return(undef);
   }
-
   
   if($cmd eq "MapToBacnet")
   {
@@ -241,7 +245,21 @@ MbusDevice_Set($@)
     fhem("attr $name mapToBacnet 1");
     return(undef);
   }
-  push @setList, "UseSecondaryAddress Retries RetryPause Timeout PollInterval MapToBacnet";   
+
+  if($cmd eq "FrameCount")
+  {
+    my $value = join ' ', @a;
+    if($value eq "")
+    {
+      fhem("deleteattr $name frameCount");
+      return(undef);
+    }
+    fhem("attr $name frameCount $value");
+    return(undef);
+  }
+  
+  
+  push @setList, "UseSecondaryAddress Retries RetryPause Timeout PollInterval MapToBacnet FrameCount";   
   return join ' ', @setList;
 }
 
