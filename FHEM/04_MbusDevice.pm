@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 04_MbusDevice.pm 11786 2022-06-30 23:47:55Z sschulze $
+# $Id: 04_MbusDevice.pm 12027 2022-07-07 14:23:00Z sschulze $
 # History
+# 2022-07-07 mapToBacnet can now hold multiple records
 # 2022-06-30 frameCount Attribute added
 # 2022-05-29 mapToBacnet Attribute added
 # 2022-01-25 Initial commit
@@ -32,7 +33,7 @@ MbusDevice_Define($$)
 
   return "Wrong syntax: use define <name> MbusDevice <MbusNetwork> <PRIMARY_ADDRESS|SECONDARY_ADDRESS>" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-06-30_23:47:55";
+  $hash->{VERSION} = "2022-07-07_14:23:00";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusDevice';
@@ -242,7 +243,7 @@ MbusDevice_Set($@)
       fhem("deleteattr $name mapToBacnet");
       return(undef);
     }
-    fhem("attr $name mapToBacnet 1");
+    fhem("attr $name mapToBacnet $value");
     return(undef);
   }
 
@@ -359,6 +360,10 @@ sub MbusDevice_isNotInt{
     <ul>
       <li><a name="UseSecondaryAddress">UseSecondaryAddress 1</a><br/>
         If activated, the Attribute useSecondaryAddress will be set. Otherwise the Attribute will be deleted.<br/>
+      </li>
+      <li><a name="MapToBacnet">MapToBacnet 1</a><br/>
+        Set the Attribute mapToBacnet will be set.<br/>
+        <ul>Ranges: 1,2,1-10,12-15 (Page Ranges ;-))</ul>
       </li>
       <li><a name="Retries">Retries 3</a><br/>
         The Attribute retries will be set.<br/>
