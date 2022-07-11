@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 03_MbusNetwork.pm 8713 2022-05-25 06:27:56Z sschulze $
+# $Id: 03_MbusNetwork.pm 8984 2022-07-09 00:41:45Z sschulze $
 # History
 # 2022-01-25 Initital commit
 
@@ -30,7 +30,7 @@ MbusNetwork_Define($$)
 
   return "Wrong syntax: use define <name> MbusNetwork ip:port [TCP|UDP]" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-05-25_06:27:56";
+  $hash->{VERSION} = "2022-07-09_00:41:45";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusNetwork';
@@ -194,8 +194,8 @@ MbusNetwork_Set($@)
 
   if($cmd eq "AutoCreate")
   {
-    my $value = (join ' ', @a) + 0;
-    if($value < 1)
+    my $value = join ' ', @a;
+    if($value eq "" || $value eq "0")
     {
       fhem("deleteattr $name autocreate");
       return(undef);
@@ -298,6 +298,10 @@ sub MbusNetwork_isNotInt{
           </ul>
           <br/>
           
+      </li>
+      <li><a name="CreateMeter">AutoCreate 1</a><br/>
+        Creates all not existing MBUS-Devices from scan-result.<br/>
+        If the primary address of the MBUS-Device ist NOT unique, the attribute useSecondaryAddress will be set to 1.<br/>
       </li>
       <li><a name="CancelScanMeter">CancelScanMeter</a><br/>
           Cancels an running Meter Scan

@@ -1,4 +1,5 @@
 Last changes:
+2022-07-11 New Attribute bacnetIndex for Instance Number calculation
 2022-07-07 mapToBacnet can now hold multiple records
 2022-06-30 frameCount Attribute added
 2022-05-29 MapToBacnet Attribute added

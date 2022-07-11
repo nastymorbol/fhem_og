@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 04_MbusDevice.pm 12027 2022-07-07 14:23:00Z sschulze $
+# $Id: 04_MbusDevice.pm 12351 2022-07-11 16:35:06Z sschulze $
 # History
+# 2022-07-11 New Attribute bacnetIndex for Instance Number calculation
 # 2022-07-07 mapToBacnet can now hold multiple records
 # 2022-06-30 frameCount Attribute added
 # 2022-05-29 mapToBacnet Attribute added
@@ -20,7 +21,7 @@ MbusDevice_Initialize($)
   $hash->{SetFn}     = "MbusDevice_Set";
   $hash->{DefFn}     = "MbusDevice_Define";
   $hash->{AttrFn}    = "MbusDevice_Attr";
-  $hash->{AttrList}  = "disable useSecondaryAddress retries retryPause timeout pollInterval mapToBacnet frameCount";
+  $hash->{AttrList}  = "disable useSecondaryAddress retries retryPause timeout pollInterval mapToBacnet frameCount bacnetIndex";
 }
 
 sub
@@ -33,7 +34,7 @@ MbusDevice_Define($$)
 
   return "Wrong syntax: use define <name> MbusDevice <MbusNetwork> <PRIMARY_ADDRESS|SECONDARY_ADDRESS>" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-07-07_14:23:00";
+  $hash->{VERSION} = "2022-07-11_16:35:06";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusDevice';
@@ -441,6 +442,12 @@ sub MbusDevice_isNotInt{
       Space separated list of readings, which will be set, if the first
       argument of the set command matches one of them.</li>
 
+    <li><a name="bacnetIndex">bacnetIndex</a><br/>
+      Index for BACnet Instance number calculation. The BACnet Datapoint Instance is
+      calculated with an static prefix of 2E6 + bacbetIndex*10e2 + recordNumber.
+      
+    </li>
+      
     <li><a name="setList">setList</a><br/>
       Space separated list of commands, which will be returned upon "set name
       ?", so the FHEMWEB frontend can construct a dropdown and offer on/off
