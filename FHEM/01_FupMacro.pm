@@ -96,7 +96,7 @@ FupMacro_Get($$$@)
             if($searchPattern)
             {
                 my $isReading = ReadingsVal($name, $searchPattern, undef);
-                if($isReading)
+                if(defined($isReading))
                 {
                     if($reading eq $searchPattern)
                     {
@@ -231,7 +231,7 @@ FupMacro_Set($@)
         
         return(undef);
     }
-
+    
     if($cmd eq 'WriteLabel')
     {
         $cmd = shift @a;
@@ -246,23 +246,23 @@ FupMacro_Set($@)
         $json = FupMacro_Get($hash, $name, "LabelData", $cmd);
         if(index($json, '{') == 0 && index($json, '}') > 2)
         {
-            $cmd = from_json($json)->{reading};
+            $cmd = decode_json($json)->{reading};
             $currentValue = ReadingsVal($name, $cmd, undef);
         }
     }
-    if($currentValue)
+    if(defined $currentValue)
     {
         # set ISPHS26_system scan_C1ERRO_ULI_4 33
         # set ISPHS26_system C1ERRO 33
         # setreading ISPHS26_system scan_C1ERRO_ULI_4 33
         my $newValue = shift(@a);
     
-        if($newValue)
+        if(defined $newValue)
         {
             $json = FupMacro_Get($hash, $name, "LabelData", $cmd) if not defined $json;
             # check for empty array
             if(index($json, '{') == 0 && index($json, '}') > 2) {
-                my $label = from_json($json)->{name};
+                my $label = decode_json($json)->{name};
                 if($label)
                 {
                     my $ioDev = $hash->{IODev};
