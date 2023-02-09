@@ -1,11 +1,12 @@
 ##############################################
-# $Id: 01_FupMacro.pm 20859 2022-07-21 16:46:23Z sschulze $
+# $Id: 01_FupMacro.pm 20924 2023-02-09 17:14:29Z sschulze $
 # History
 # 2021-11-05 Initial commit
 # 2021-11-20 Changed command structure
 # 2021-11-20 New Command read label values
 # 2021-11-22 FUP Page Name max Length corrected
 # 2022-05-09 Changed JSON Interpreter
+# 2023-02-09 Support for Label set commands with whitespaces
 
 package main;
 
@@ -255,7 +256,7 @@ FupMacro_Set($@)
         # set ISPHS26_system scan_C1ERRO_ULI_4 33
         # set ISPHS26_system C1ERRO 33
         # setreading ISPHS26_system scan_C1ERRO_ULI_4 33
-        my $newValue = shift(@a);
+        my $newValue = join(' ', @a);
     
         if(defined $newValue)
         {
@@ -412,7 +413,7 @@ FupMacro_Define($$)
     
     return "Wrong syntax: use define <name> FupMacro <OPENems> [FupPageName]" if(int(@a) < 2);
     
-    $hash->{VERSION} = "2022-07-21_16:46:23";
+    $hash->{VERSION} = "2023-02-09_17:14:29";
     
     my $type = shift @a;
     my $iodev = shift @a;
