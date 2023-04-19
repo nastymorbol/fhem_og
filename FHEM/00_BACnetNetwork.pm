@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 00_BACnetNetwork.pm 7823 2021-11-20 00:51:28Z sschulze $
+# $Id: 00_BACnetNetwork.pm 7863 2023-04-19 12:46:24Z sschulze $
 # History
 # 2021-04-12 DriverReq wurde immer wieder neu getriggert
 #            Get für ScanNetwork entfernt
@@ -165,7 +165,7 @@ BACnetNetwork_Define($$)
 
   return "Wrong syntax: use define <name> BACnetNetwork DeviceInstance IP[:Port]" if(int(@a) != 3);
 
-  $hash->{VERSION} = "2021-11-20_00:51:28";
+  $hash->{VERSION} = "2023-04-19_12:46:24";
 
   if(AttrVal($name,"room",undef)) {
     
