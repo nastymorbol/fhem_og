@@ -204,19 +204,19 @@ BACnetNetwork_Define($$)
 <h3>BACnetNetwork</h3>
 <ul>
 
-  Define a BACnetNetwork. A BACnetNetwork can take via <a href="#set">set</a> any values.
+  Define a BACnetNetwork. A BACnetNetwork can take via <a href="#set">set</a>.
   Used for programming.
   <br><br>
 
   <a name="dummydefine"></a>
   <b>Define</b>
   <ul>
-    <code>define &lt;name&gt; BACnetNetwork</code>
+    <code>define &lt;name&gt; BACnetNetwork DeviceInstance IP[:Port]</code>
     <br><br>
 
     Example:
     <ul>
-      <code>define MyBACnetNetwork BACnetNetwork</code><br>
+      <code>define MyBACnetNetwork BACnetNetwork 6378 192.168.178.54:47808</code><br>
       <code>set myvar 7</code><br>
     </ul>
   </ul>
