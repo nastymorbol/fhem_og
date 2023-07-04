@@ -118,8 +118,8 @@ BACnetDatapoint_Set($$)
     my $value = join ' ', @a;
     
     fhem("attr $name $cmd $value");
-    
-    return undef;
+
+    return "attribute changed";
   }
   elsif($cmd =~ /DriverRes/)
   {
