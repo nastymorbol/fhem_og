@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 02_BACnetDatapoint.pm 11065 2021-12-22 12:41:47Z sschulze $
+# $Id: 02_BACnetDatapoint.pm 11156 2023-07-04 23:34:56Z sschulze $
 # History
+# 2023-07-04 Set PollInterval returns now a string to prevent false state change
 # 2021-09-13 Datapoint define now possible with missing BACnet Device
 # 2021-08-10 Add prop_presentValue setter as default
 # 2020-12-02 CLI Commandos Encoding Problem behoben
@@ -215,7 +216,7 @@ BACnetDatapoint_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
-  $hash->{VERSION} = "2021-12-22_12:41:47";
+  $hash->{VERSION} = "2023-07-04_23:34:56";
 
   my $name = shift @a;
   my $type = shift @a;
