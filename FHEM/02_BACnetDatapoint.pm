@@ -268,7 +268,7 @@ BACnetDatapoint_Define($$)
     $attr{$name}{room} = 'BACnet,BACnet->Datapoints->' . $dev_hash->{Instance};
   }
   
-  readingsSingleUpdate($hash,"state", "defined",1);
+  readingsSingleUpdate($hash,"state", "defined", 0);
     
   return undef;
 }
