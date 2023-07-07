@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 02_BACnetDatapoint.pm 11156 2023-07-04 23:34:56Z sschulze $
+# $Id: 02_BACnetDatapoint.pm 11157 2023-07-06 12:21:10Z sschulze $
 # History
 # 2023-07-04 Set PollInterval returns now a string to prevent false state change
 # 2021-09-13 Datapoint define now possible with missing BACnet Device
@@ -216,7 +216,7 @@ BACnetDatapoint_Define($$)
 #  Log3 $hash, 1, "Get irgendwas " . join(" ", @{$a}) . " -> " . @{$a};
   return "Wrong syntax: use define <name> BACnetDatapoint BACnetDevice ObjectId" if(int(@a) != 4);
 
-  $hash->{VERSION} = "2023-07-04_23:34:56";
+  $hash->{VERSION} = "2023-07-06_12:21:10";
 
   my $name = shift @a;
   my $type = shift @a;
