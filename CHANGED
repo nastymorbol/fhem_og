@@ -1,4 +1,5 @@
 Last changes:
+2023-07-26 Added default attributes to MbusDevice
 2023-07-26 Type in MbusDevice documentation
 2023-07-04 Set PollInterval returns now a string to prevent false state change
 2023-05-19 Update BACnet network doc
