@@ -21,7 +21,7 @@ MbusDevice_Initialize($)
   $hash->{SetFn}     = "MbusDevice_Set";
   $hash->{DefFn}     = "MbusDevice_Define";
   $hash->{AttrFn}    = "MbusDevice_Attr";
-  $hash->{AttrList}  = "disable useSecondaryAddress retries retryPause timeout pollInterval mapToBacnet frameCount bacnetIndex";
+  $hash->{AttrList}  = "disable useSecondaryAddress retries retryPause timeout pollInterval mapToBacnet frameCount bacnetIndex " . $readingFnAttributes;
 }
 
 sub

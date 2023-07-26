@@ -17,7 +17,7 @@ MbusNetwork_Initialize($)
   $hash->{SetFn}     = "MbusNetwork_Set";
   $hash->{DefFn}     = "MbusNetwork_Define";
   $hash->{AttrFn}    = "MbusNetwork_Attr";
-  $hash->{AttrList}  = "disable autocreate";
+  $hash->{AttrList}  = "disable autocreate " . $readingFnAttributes;;
 }
 
 sub
