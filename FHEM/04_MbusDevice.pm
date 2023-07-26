@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 04_MbusDevice.pm 12351 2022-07-11 16:35:06Z sschulze $
+# $Id: 04_MbusDevice.pm 12352 2023-07-26 03:05:38Z sschulze $
 # History
 # 2022-07-11 New Attribute bacnetIndex for Instance Number calculation
 # 2022-07-07 mapToBacnet can now hold multiple records
@@ -34,7 +34,7 @@ MbusDevice_Define($$)
 
   return "Wrong syntax: use define <name> MbusDevice <MbusNetwork> <PRIMARY_ADDRESS|SECONDARY_ADDRESS>" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-07-11_16:35:06";
+  $hash->{VERSION} = "2023-07-26_03:05:38";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusDevice';
@@ -444,13 +444,13 @@ sub MbusDevice_isNotInt{
 
     <li><a name="bacnetIndex">bacnetIndex</a><br/>
       Index for BACnet Instance number calculation. The BACnet Datapoint Instance is
-      calculated with an static prefix of 2E6 + bacbetIndex*10e2 + recordNumber.
+      calculated with an static prefix of 2E6 + bacnetIndex*10e2 + recordNumber.
       
     </li>
       
     <li><a name="setList">setList</a><br/>
-      Space separated list of commands, which will be returned upon "set name
-      ?", so the FHEMWEB frontend can construct a dropdown and offer on/off
+      Space separated list of commands, which will be returned upon "set name ?", 
+      so the FHEMWEB frontend can construct a dropdown and offer on/off
       switches. Example: attr dummyName setList on off </li>
 
     <li><a href="#readingFnAttributes">readingFnAttributes</a></li>
