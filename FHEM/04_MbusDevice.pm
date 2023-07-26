@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 04_MbusDevice.pm 12352 2023-07-26 03:05:38Z sschulze $
+# $Id: 04_MbusDevice.pm 12376 2023-07-26 05:31:48Z sschulze $
 # History
 # 2022-07-11 New Attribute bacnetIndex for Instance Number calculation
 # 2022-07-07 mapToBacnet can now hold multiple records
@@ -34,7 +34,7 @@ MbusDevice_Define($$)
 
   return "Wrong syntax: use define <name> MbusDevice <MbusNetwork> <PRIMARY_ADDRESS|SECONDARY_ADDRESS>" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2023-07-26_03:05:38";
+  $hash->{VERSION} = "2023-07-26_05:31:48";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusDevice';

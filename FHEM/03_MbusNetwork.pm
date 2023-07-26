@@ -1,5 +1,5 @@
 ##############################################
-# $Id: 03_MbusNetwork.pm 8984 2022-07-09 00:41:45Z sschulze $
+# $Id: 03_MbusNetwork.pm 9009 2023-07-26 05:31:59Z sschulze $
 # History
 # 2022-01-25 Initital commit
 
@@ -30,7 +30,7 @@ MbusNetwork_Define($$)
 
   return "Wrong syntax: use define <name> MbusNetwork ip:port [TCP|UDP]" if(int(@a) < 2);
 
-  $hash->{VERSION} = "2022-07-09_00:41:45";
+  $hash->{VERSION} = "2023-07-26_05:31:59";
 
   if(not defined AttrVal($name,"room", undef)) {
     $attr{$name}{room} = 'MbusNetwork';
