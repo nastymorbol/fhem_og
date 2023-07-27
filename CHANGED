@@ -1,4 +1,6 @@
 Last changes:
+2023-07-27 Removed JSON::PP Dependency
+
 2023-07-26 Added default attributes to MbusDevice
 2023-07-26 Type in MbusDevice documentation
 2023-07-04 Set PollInterval returns now a string to prevent false state change

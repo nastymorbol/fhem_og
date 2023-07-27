@@ -1,13 +1,14 @@
 ##############################################
-# $Id: 00_OPENgate.pm 22663 2021-12-21 15:05:29Z sschulze $
+# $Id: 00_OPENgate.pm 22768 2023-07-27 02:17:49Z sschulze $
 # History
+# 2023-07-27 Removed JSON::PP Dependency
 # 2021-12-15 Added command for ssh tunnel over ip
 # 2021-12-15 MqttClient init if Parameter set
 # 2021-12-04 Metric channel update (now subtopic perl)
 # 2021-11-13 FallBack MQTT Driver if C# Client disconnected
 # 2021-11-13 MqttClient cyclic parameter update
 # 2021-11-05 Implemented FallBack MQTT Driver if C# Client doesnt appear within 360 sec
-# 2021-08-30 Problem while updateing MQTT Parameter
+# 2021-08-30 Problem while updating MQTT Parameter
 # 2021-06-14 Bug in Gateway Parameter setter
 # 2021-05-20 Support for URN set
 # 2021-05-03 External MQTT Driver prepare
@@ -19,6 +20,7 @@ package main;
 
 use strict;
 use warnings;
+use JSON;
 
 sub
 OPENgate_Initialize($)
@@ -195,7 +197,7 @@ OPENgate_Define($$)
     
     $hash->{NOTIFYDEV} = "global";
     
-    $hash->{VERSION} = "2021-12-21_15:05:29";
+    $hash->{VERSION} = "2023-07-27_02:17:49";
 
     OPENgate_InitializeInternalUrn($hash);
     
@@ -577,8 +579,9 @@ mqttCliCommand($$$$)
 			$response->{ts_res} = unixTimeMs();
 		}
 		
-		my $payload = JSON->new->utf8(1)->encode($response);
-
+		#my $payload = JSON->new->utf8(1)->encode($response);
+        my $payload = encode_json($response);
+        
 		# Direct call to MQTT2 Clients
 		postMqttPayload($respTopic, $payload);
 		
