@@ -1,6 +1,7 @@
 ##############################################
-# $Id: 00_OPENgate.pm 22768 2023-07-27 02:17:49Z sschulze $
+# $Id: 00_OPENgate.pm 23005 2023-08-07 17:36:25Z sschulze $
 # History
+# 2023-08-07 bacnetDriver emulates an Frontend restart
 # 2023-07-27 Removed JSON::PP Dependency
 # 2021-12-15 Added command for ssh tunnel over ip
 # 2021-12-15 MqttClient init if Parameter set
@@ -20,7 +21,6 @@ package main;
 
 use strict;
 use warnings;
-use JSON;
 
 sub
 OPENgate_Initialize($)
@@ -91,8 +91,14 @@ OPENgate_Set($@)
   if($prop eq "bacnetDriver")
   {
     #my $payload = join(" ", @a);
-    return OPENgate_SshCommand($hash, "docker restart runtime_bacnetnf_1", 30, "1");
+    #return OPENgate_SshCommand($hash, "docker restart runtime_bacnetnf_1", 30, "1");
     #return undef;#$hash->{ShellCommandRes};
+    InternalTimer(gettimeofday() + 5, sub {
+        DoTrigger("global", "SHUTDOWN", 1);
+    #    CommandSave(undef, undef);
+    #    CommandShutdown(undef, "1");
+      }, undef);
+    return;
   }
 
   # Execute Shell Command ....
@@ -197,7 +203,7 @@ OPENgate_Define($$)
     
     $hash->{NOTIFYDEV} = "global";
     
-    $hash->{VERSION} = "2023-07-27_02:17:49";
+    $hash->{VERSION} = "2023-08-07_17:36:25";
 
     OPENgate_InitializeInternalUrn($hash);
     

@@ -1,4 +1,5 @@
 Last changes:
+2023-08-07 OPENgate bacnetDriver emulates an Frontend restart
 2023-07-27 Removed JSON::PP Dependency
 
 2023-07-26 Added default attributes to MbusDevice
